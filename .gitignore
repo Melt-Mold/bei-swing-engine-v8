@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+.tox/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project specific
+output_test/
+output/
+*.log
+data-csv-yfinance-cleaned/new_data/
+data-csv-yfinance-cleaned/merged/
+
+# Streamlit
+.streamlit/
+
+# OS
+Thumbs.db
+desktop.ini

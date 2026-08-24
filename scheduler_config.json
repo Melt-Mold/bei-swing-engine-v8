@@ -1,0 +1,39 @@
+{
+  "tickers": [
+    "BBRI",
+    "BBCA",
+    "TLKM"
+  ],
+  "ihsg": true,
+  "period": "1y",
+  "interval": "1d",
+  "params": {
+    "MODE": "C",
+    "HORIZON": "SWING",
+    "DIRECTION": "BOTH",
+    "POSITION": "NO_POSITION",
+    "MODAL": 10000000,
+    "RISK": 2.0,
+    "OUTPUT": "Chat",
+    "IHSG": "uploaded"
+  },
+  "output_dir": "output",
+  "data_dir": "data-scheduled",
+  "email_enabled": false,
+  "email_smtp_host": "",
+  "email_smtp_port": 587,
+  "email_user": "",
+  "email_password": "",
+  "email_to": [],
+  "run_once": false,
+  "interval_minutes": 0,
+  "notify_on": [
+    "BUY",
+    "SELL"
+  ],
+  "optimize_enabled": false,
+  "optimize_interval_days": 7,
+  "optimize_step": 5,
+  "optimize_windows": 2,
+  "optimize_last_run": ""
+}
