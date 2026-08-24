@@ -281,9 +281,9 @@ If a confluence factor value is `N/A` (e.g., SMA200 unavailable due to insuffici
 11. Volume vs MA20
 12. Volume Synthesis
 13. Weinstein Stage
-14. 3M return
+14. 3M return — rendered on the Multi-TF Monthly row
 15. ATR% regime (always ○)
-16. Bollinger position (always ○)
+16. Bollinger position (always ○) — rendered on the BB Mid row
 
 ## 7.4 The 42 Rows
 
@@ -292,8 +292,8 @@ If a confluence factor value is `N/A` (e.g., SMA200 unavailable due to insuffici
 | # | Indicator | Badge? | Condition / Formula |
 |---|---|---|---|
 | 1 | MA Alignment | No | Bullish: EMA9>SMA20>SMA50>SMA200; Bearish: reversed; Mixed: otherwise |
-| 2 | Trend Classification | Yes | Uptrend / Downtrend / Sideways from structure + MAs |
-| 3 | Multi-TF Monthly | No | Up / Down / Sideways from monthly resampled close |
+| 2 | Trend Classification | Yes | Uptrend / Downtrend / Sideways from MAs |
+| 3 | Multi-TF Monthly | Yes (3M return) | Up / Down / Sideways from monthly resampled close; 3M return badge: ✓ >+5%, ✗ <-5%, ○ ±5% |
 | 4 | Multi-TF Weekly | No | Up / Down / Sideways from weekly resampled close |
 | 5 | Multi-TF Daily | No | Up / Down / Sideways from daily close |
 | 6 | Weinstein Stage | Yes | Stage 1/2/3/4 from weekly MA30w slope |
@@ -325,7 +325,7 @@ If a confluence factor value is `N/A` (e.g., SMA200 unavailable due to insuffici
 | 22 | ATR(14) | No | Wilder smoothing of True Range |
 | 23 | ATR% | Yes (always ○) | (ATR14 / Close) × 100; regime context only |
 | 24 | BB Upper(20,2σ) | No | SMA20 + 2σ |
-| 25 | BB Mid(20,2σ) | No | SMA20 |
+| 25 | BB Mid(20,2σ) | Yes (always ○) | SMA20; Bollinger position confluence factor (always ○) |
 | 26 | BB Lower(20,2σ) | No | SMA20 − 2σ |
 
 ### VOLUME (4 rows)
@@ -346,7 +346,7 @@ If a confluence factor value is `N/A` (e.g., SMA200 unavailable due to insuffici
 | 33 | Ichimoku Senkou A | No | (Tenkan + Kijun) / 2, shifted +26 |
 | 34 | Ichimoku Senkou B(52) | No | (HH52 + LL52) / 2, shifted +26 |
 | 35 | Ichimoku Chikou | No | Close shifted −26 |
-| 36 | Divergence Scan | ⚡Div only | Regular/Hidden Bullish/Bearish on RSI/MACD/OBV |
+| 36 | Divergence Scan | ⚡ Div only | Regular/Hidden Bullish/Bearish on RSI/MACD/OBV |
 | 37 | Candlestick (Tier 1) | No | Hammer, Engulfing, Doji, etc. |
 | 38 | Chart Patterns (Tier 2) | No | Double Top/Bottom, H&S, Triangle, Wedge, etc. |
 
@@ -361,11 +361,11 @@ If a confluence factor value is `N/A` (e.g., SMA200 unavailable due to insuffici
 
 ## 7.5 Formulas
 
-- **EMA(n):** α = 2/(n+1), seed = SMA(n)
-- **RSI(14):** Wilder smoothing, seed = mean of first 14 gains/losses
+- **EMA(n):** α = 2/(n+1); implementation uses `pandas.ewm(span=n, adjust=False)` (first valid observation as seed)
+- **RSI(14):** Wilder smoothing (`α = 1/14`); implementation uses `pandas.ewm(alpha=1/14, adjust=False)` on gains/losses (first valid observation as seed)
 - **MACD(12,26,9):** Line = EMA12 − EMA26; Signal = EMA9(Line); Histogram = Line − Signal
-- **ADX(14), +DI, -DI:** Wilder smoothing, exclusive dominance
-- **ATR(14):** TR = max(H−L, |H−C_prev|, |L−C_prev|); Wilder smoothing
+- **ADX(14), +DI, -DI:** Wilder smoothing (`α = 1/14`); implementation uses `pandas.ewm(alpha=1/14, adjust=False)` (first valid observation as seed)
+- **ATR(14):** TR = max(H−L, |H−C_prev|, |L−C_prev|); Wilder smoothing (`α = 1/14`) using `pandas.ewm(alpha=1/14, adjust=False)`
 - **ATR%:** (ATR14 / Close) × 100
 - **ROC(20):** ((Close − Close_20) / Close_20) × 100
 - **CMF(20):** MFM = ((C−L) − (H−C)) / (H−L); CMF = Σ(MFM×Volume,20) / Σ(Volume,20)
@@ -381,6 +381,7 @@ If a confluence factor value is `N/A` (e.g., SMA200 unavailable due to insuffici
 - Stage 4: Close < MA30w AND slope < −0.5% → ✗
 - Stage 3: Close > MA30w AND slope ≤ 0 → ○
 - Stage 1: Close < MA30w AND slope ≥ 0 → ○
+- Transition band (0% < slope ≤ +0.5% with Close > MA30w, or −0.5% ≤ slope < 0% with Close < MA30w) → N/A — slope in undefined transition band
 
 ## 7.7 Volume Synthesis
 
@@ -535,7 +536,7 @@ Soft warnings annotate but never veto, reverse, or create decisions:
 | | BUY-02 | Tradeable entry with warnings |
 | | BUY-03 | Range-boundary entry under neutral structure |
 | Wait | WAIT-01 | Setup developing/absent with live thesis |
-| | WAIT-02 | Untradeable economics |
+| | WAIT-02 | Untradeable economics (R/R < 1.5 or missing target) |
 | | WAIT-03 | Evidence conflict |
 | | WAIT-04 | Entry displaced from trigger |
 | | WAIT-05 | Minimum evidence contract unmet |
@@ -648,8 +649,8 @@ INSUFFICIENT_DATA
 ### Continuation
 - **Prerequisite:** Strong established trend.
 - **Consolidation:** Range-bound, minimum 10 bars, height ≤1.5×ATR14.
-- **Trigger:** Breakout in trend direction with volume.
-- **Invalidation:** Close against trend beyond 1.0×ATR14.
+- **Trigger:** Price approaches consolidation boundary in trend direction (within 0.25×ATR14) with volume confirmation.
+- **Invalidation:** Close beyond the consolidation boundary against the trend direction.
 
 ### Range
 - **Boundaries:** Valid upper resistance and lower support.
@@ -670,9 +671,10 @@ Precedence by status:
 Within same status, tiebreaker:
 1. Continuation
 2. Breakout
-3. Reversal
-4. Pullback
-5. Range
+3. Breakout + Retest
+4. Reversal
+5. Pullback
+6. Range
 
 Unresolved tie → `primary_setup = N/A` with explicit reason.
 
@@ -788,7 +790,7 @@ Zero-lot case: report "modal insufficient for 1 lot" as execution caveat, not an
   "sl": 3088,
   "tp1": 3350,
   "tp2": 3450,
-  "rr_raw": 0.85,
+  "rr_raw": 2.0,
   "rr_status": "VALID",
   "position_sizing": {
     "modal": 10000000,

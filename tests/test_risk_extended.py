@@ -93,14 +93,16 @@ class TestRiskExtended:
         )
         assert result.state in ("NOT_APPLICABLE", "NO_SETUP")
 
-    def test_assess_tradeability_confirmed_not_triggered(self, sample_df, sample_indicators, sample_structure, default_params):
+    def test_assess_tradeability_confirmed_is_actionable(self, sample_df, sample_indicators, sample_structure, default_params):
         setup = Setup(type="Breakout", direction="LONG", status="CONFIRMED",
                       trigger_price=None, invalidation_price=2500)
         result = assess_tradeability(
             sample_df, setup, sample_structure, sample_indicators,
             modal=default_params["MODAL"], risk_pct=default_params["RISK"], warnings=[],
         )
-        assert result.state in ("NOT_APPLICABLE", "NO_SETUP")
+        assert result.state in ("TRADEABLE", "TRADEABLE_WITH_WARNING")
+        assert result.plan is not None
+        assert result.plan.entry is not None
 
     def test_compute_trade_plan_no_atr(self, sample_df, sample_structure, default_params):
         setup = Setup(type="Pullback", direction="LONG", status="TRIGGERED",

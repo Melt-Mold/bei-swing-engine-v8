@@ -209,13 +209,13 @@ def assess_tradeability(
         result.reason = "No actionable setup"
         return result
 
-    if setup.status in {"DEVELOPING", "CONFIRMED"}:
+    if setup.status == "DEVELOPING":
         # Not yet triggered, still not actionable
-        result.state = "NO_SETUP" if setup.status == "NONE" else "NOT_APPLICABLE"
+        result.state = "NOT_APPLICABLE"
         result.reason = f"Setup {setup.status}; not yet triggered"
         return result
 
-    if setup.status != "TRIGGERED":
+    if setup.status not in {"CONFIRMED", "TRIGGERED"}:
         result.state = "NOT_APPLICABLE"
         result.reason = f"Setup status {setup.status}"
         return result
@@ -227,7 +227,7 @@ def assess_tradeability(
 
     if plan.entry is None:
         result.state = "UNTRADEABLE"
-        result.reason = "VETO-03: No defensible entry / entry displaced"
+        result.reason = "WAIT-04: Entry displaced from trigger"
         return result
 
     if plan.sl is None:
@@ -237,7 +237,7 @@ def assess_tradeability(
 
     if plan.tp1 is None or plan.rr_status == "N/A":
         result.state = "UNTRADEABLE"
-        result.reason = "VETO-03: No defensible target"
+        result.reason = "WAIT-02: No defensible target"
         return result
 
     if plan.rr_status == "UNFAVORABLE":

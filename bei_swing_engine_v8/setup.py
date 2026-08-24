@@ -19,7 +19,7 @@ from .structure import Structure, nearest_level, SWING_FRACTAL_N
 # are in engine.py / risk.py / structure.py and must not change.
 # ============================================================
 THRESHOLDS = {
-    "rvol_breakout": 1.0,         # RVOL threshold for breakout TRIGGERED
+    "rvol_breakout": 1.25,        # RVOL threshold for breakout TRIGGERED
     "rvol_reconfirm": 0.9,        # RVOL threshold for reconfirm (pullback/range/retest/continuation)
     "rsi_long_reconfirm": 35,     # RSI threshold for LONG reconfirm
     "rsi_short_reconfirm": 65,    # RSI threshold for SHORT reconfirm
