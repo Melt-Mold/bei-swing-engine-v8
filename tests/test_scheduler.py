@@ -5,11 +5,14 @@ import pandas as pd
 import json
 import os
 import tempfile
+from unittest.mock import MagicMock, patch
 
 from bei_swing_engine_v8.scheduler import (
     SchedulerConfig, SignalAlert, format_alerts_text,
     save_alerts_json, load_config_from_file, save_config_to_file,
     run_scheduler, run_optimization_cycle,
+    send_telegram_notification, send_webhook_notification,
+    send_email_notification,
 )
 
 
@@ -141,3 +144,64 @@ class TestScheduler:
         config = SchedulerConfig(optimize_enabled=False)
         result = run_optimization_cycle(config)
         assert result is None
+
+    def test_telegram_disabled_returns_false(self):
+        config = SchedulerConfig(telegram_enabled=False)
+        assert send_telegram_notification(config, "test") is False
+
+    def test_webhook_disabled_returns_false(self):
+        config = SchedulerConfig(webhook_enabled=False)
+        assert send_webhook_notification(config, "subj", "body") is False
+
+    def test_email_disabled_returns_false(self):
+        config = SchedulerConfig(email_enabled=False)
+        assert send_email_notification(config, "subj", "body") is False
+
+    def test_telegram_config_save_load(self):
+        config = SchedulerConfig(
+            telegram_enabled=True,
+            telegram_bot_token="123:ABC",
+            telegram_chat_id="987654",
+            webhook_enabled=True,
+            webhook_url="https://hooks.slack.com/test",
+        )
+        temp_dir = tempfile.mkdtemp()
+        path = os.path.join(temp_dir, "notify_config.json")
+        save_config_to_file(config, path)
+        loaded = load_config_from_file(path)
+        assert loaded.telegram_enabled is True
+        assert loaded.telegram_bot_token == "123:ABC"
+        assert loaded.telegram_chat_id == "987654"
+        assert loaded.webhook_enabled is True
+        assert loaded.webhook_url == "https://hooks.slack.com/test"
+
+    @patch("urllib.request.urlopen")
+    def test_telegram_send_success(self, mock_urlopen):
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.__enter__ = lambda self: mock_resp
+        mock_resp.__exit__ = lambda self, *args: None
+        mock_urlopen.return_value = mock_resp
+
+        config = SchedulerConfig(
+            telegram_enabled=True,
+            telegram_bot_token="123:ABC",
+            telegram_chat_id="987654",
+        )
+        result = send_telegram_notification(config, "Test signal")
+        assert result is True
+
+    @patch("urllib.request.urlopen")
+    def test_webhook_send_success(self, mock_urlopen):
+        mock_resp = MagicMock()
+        mock_resp.status = 200
+        mock_resp.__enter__ = lambda self: mock_resp
+        mock_resp.__exit__ = lambda self, *args: None
+        mock_urlopen.return_value = mock_resp
+
+        config = SchedulerConfig(
+            webhook_enabled=True,
+            webhook_url="https://hooks.slack.com/test",
+        )
+        result = send_webhook_notification(config, "subj", "body")
+        assert result is True

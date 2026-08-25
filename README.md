@@ -4,7 +4,7 @@
 > Menghasilkan laporan swing-trading analysis dengan keputusan BUY/HOLD/SELL/WAIT/NO_SETUP.
 
 [![CI](https://github.com/user/bei-swing-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/user/bei-swing-engine/actions)
-[![Tests](https://img.shields.io/badge/tests-279%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-285%20passed-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-81%25-yellow)]()
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue)]()
 
@@ -330,7 +330,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi 6 setup
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # 279 unit tests (30 file)
+├── tests/                            # 285 unit tests (30 file)
 ├── data-csv-yfinance-cleaned/        # Sample data (9 file)
 └── output_test/                      # Sample output
 ```
@@ -424,6 +424,49 @@ docker-compose up engine   # One-off analysis TLKM
 
 ---
 
+## Scheduler
+
+Auto-fetch data from Yahoo Finance, run analysis, and get notified on BUY/SELL signals.
+
+### Quick Start
+
+```powershell
+# Run once with specific tickers
+.\venv\Scripts\python.exe scheduler_app.py --tickers BBRI BBCA TLKM --period 1y --once
+
+# Run recurring every 60 minutes
+.\venv\Scripts\python.exe scheduler_app.py --tickers BBRI BBCA --interval-min 60
+
+# Use config file
+.\venv\Scripts\python.exe scheduler_app.py --config scheduler_config.json
+
+# Create default config file
+.\venv\Scripts\python.exe scheduler_app.py --create-config
+```
+
+### Notification Channels
+
+| Channel | CLI Flag | Config Fields |
+|---|---|---|
+| Email | `--email --smtp-host smtp.gmail.com --email-user user@gmail.com --email-pass secret --email-to recipient@email.com` | `email_enabled`, `email_smtp_host`, `email_user`, `email_password`, `email_to` |
+| Telegram | `--telegram --telegram-token 123:ABC --telegram-chat 987654` | `telegram_enabled`, `telegram_bot_token`, `telegram_chat_id` |
+| Webhook | `--webhook --webhook-url https://hooks.slack.com/...` | `webhook_enabled`, `webhook_url` |
+
+### Output Files
+
+Scheduler writes to `output/`:
+- `signals_YYYY-MM-DD.json` — structured alerts
+- `signals_YYYY-MM-DD.md` — readable report
+
+### Cron (daily at 09:00)
+
+```powershell
+# Windows Task Scheduler
+schtasks /create /tn "BEI_Swing_Scheduler" /tr "C:\Opencode4\venv\Scripts\python.exe C:\Opencode4\scheduler_app.py --config C:\Opencode4\scheduler_config.json --once" /sc daily /st 09:00
+```
+
+---
+
 ## Testing
 
 ```powershell
@@ -443,7 +486,7 @@ docker-compose up engine   # One-off analysis TLKM
 .\venv\Scripts\python.exe -m pytest tests/test_api.py -k openapi -v
 ```
 
-**Status:** 279 tests, all passing. Coverage: 81%. Linting: 0 errors.
+**Status:** 285 tests, all passing. Coverage: 81%. Linting: 0 errors.
 
 ---
 

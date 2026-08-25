@@ -43,6 +43,13 @@ class SchedulerConfig:
     email_user: str = ""
     email_password: str = ""
     email_to: List[str] = field(default_factory=list)
+    # Telegram notification (optional)
+    telegram_enabled: bool = False
+    telegram_bot_token: str = ""
+    telegram_chat_id: str = ""
+    # Generic webhook notification (optional, for Discord/Slack/custom)
+    webhook_enabled: bool = False
+    webhook_url: str = ""
     # Schedule
     run_once: bool = False
     interval_minutes: int = 0  # 0 = run once; >0 = recurring
@@ -226,6 +233,61 @@ def send_email_notification(config: SchedulerConfig, subject: str, body: str) ->
         return False
 
 
+def send_telegram_notification(config: SchedulerConfig, text: str) -> bool:
+    """Send Telegram message via Bot API. Returns True on success."""
+    if not config.telegram_enabled or not config.telegram_bot_token or not config.telegram_chat_id:
+        return False
+
+    try:
+        import urllib.request
+        import urllib.parse
+
+        url = f"https://api.telegram.org/bot{config.telegram_bot_token}/sendMessage"
+        payload = urllib.parse.urlencode({
+            "chat_id": config.telegram_chat_id,
+            "text": text,
+            "parse_mode": "Markdown",
+        }).encode("utf-8")
+
+        req = urllib.request.Request(url, data=payload, method="POST")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status == 200:
+                _log.info("telegram sent | chat_id=%s", config.telegram_chat_id)
+                return True
+            _log.error("telegram failed | status=%d", resp.status)
+            return False
+    except Exception as e:
+        _log.error("telegram failed | error=%s", e)
+        return False
+
+
+def send_webhook_notification(config: SchedulerConfig, subject: str, body: str) -> bool:
+    """Send generic webhook (Discord/Slack/custom). Returns True on success."""
+    if not config.webhook_enabled or not config.webhook_url:
+        return False
+
+    try:
+        import urllib.request
+        import json as _json
+
+        payload = _json.dumps({"subject": subject, "body": body}).encode("utf-8")
+        req = urllib.request.Request(
+            config.webhook_url,
+            data=payload,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            if resp.status in (200, 201, 204):
+                _log.info("webhook sent | url=%s", config.webhook_url)
+                return True
+            _log.error("webhook failed | status=%d", resp.status)
+            return False
+    except Exception as e:
+        _log.error("webhook failed | error=%s", e)
+        return False
+
+
 def run_optimization_cycle(config: SchedulerConfig) -> Optional[str]:
     """
     Run optimization for all tickers and save reports.
@@ -350,6 +412,18 @@ def run_scheduler(config: SchedulerConfig) -> List[SignalAlert]:
             body=text,
         )
 
+    # Telegram notification
+    if config.telegram_enabled and alerts:
+        send_telegram_notification(config, text)
+
+    # Webhook notification
+    if config.webhook_enabled and alerts:
+        send_webhook_notification(
+            config,
+            subject=f"BEI Swing Engine — {len(alerts)} Signal(s) — {date_str}",
+            body=text,
+        )
+
     _log.info("scheduler done | alerts=%d", len(alerts))
     return alerts
 
@@ -397,6 +471,11 @@ def load_config_from_file(path: str) -> SchedulerConfig:
         email_user=data.get("email_user", ""),
         email_password=data.get("email_password", ""),
         email_to=data.get("email_to", []),
+        telegram_enabled=data.get("telegram_enabled", False),
+        telegram_bot_token=data.get("telegram_bot_token", ""),
+        telegram_chat_id=data.get("telegram_chat_id", ""),
+        webhook_enabled=data.get("webhook_enabled", False),
+        webhook_url=data.get("webhook_url", ""),
         run_once=data.get("run_once", False),
         interval_minutes=data.get("interval_minutes", 0),
         notify_on=data.get("notify_on", ["BUY", "SELL"]),
@@ -424,6 +503,11 @@ def save_config_to_file(config: SchedulerConfig, path: str):
         "email_user": config.email_user,
         "email_password": config.email_password,
         "email_to": config.email_to,
+        "telegram_enabled": config.telegram_enabled,
+        "telegram_bot_token": config.telegram_bot_token,
+        "telegram_chat_id": config.telegram_chat_id,
+        "webhook_enabled": config.webhook_enabled,
+        "webhook_url": config.webhook_url,
         "run_once": config.run_once,
         "interval_minutes": config.interval_minutes,
         "notify_on": config.notify_on,

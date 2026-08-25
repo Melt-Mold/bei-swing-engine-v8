@@ -25,6 +25,11 @@
   "email_user": "",
   "email_password": "",
   "email_to": [],
+  "telegram_enabled": false,
+  "telegram_bot_token": "",
+  "telegram_chat_id": "",
+  "webhook_enabled": false,
+  "webhook_url": "",
   "run_once": false,
   "interval_minutes": 0,
   "notify_on": [

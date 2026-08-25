@@ -84,6 +84,13 @@ Examples:
     parser.add_argument("--email-user", default="", help="SMTP username")
     parser.add_argument("--email-pass", default="", help="SMTP password")
     parser.add_argument("--email-to", nargs="+", default=[], help="Recipient email addresses")
+    # Telegram options
+    parser.add_argument("--telegram", action="store_true", help="Enable Telegram notification")
+    parser.add_argument("--telegram-token", default="", help="Telegram Bot API token")
+    parser.add_argument("--telegram-chat", default="", help="Telegram chat ID")
+    # Webhook options
+    parser.add_argument("--webhook", action="store_true", help="Enable webhook notification")
+    parser.add_argument("--webhook-url", default="", help="Webhook URL (Discord/Slack/custom)")
 
     args = parser.parse_args(argv)
 
@@ -123,6 +130,11 @@ Examples:
             email_user=args.email_user,
             email_password=args.email_pass,
             email_to=args.email_to,
+            telegram_enabled=args.telegram,
+            telegram_bot_token=args.telegram_token,
+            telegram_chat_id=args.telegram_chat,
+            webhook_enabled=args.webhook,
+            webhook_url=args.webhook_url,
             run_once=args.once or (args.interval_min == 0),
             interval_minutes=args.interval_min,
             notify_on=args.notify_on,
@@ -139,6 +151,8 @@ Examples:
     print(f"Mode: {config.params.get('MODE', 'C')} | Direction: {config.params.get('DIRECTION', 'BOTH')}")
     print(f"Notify on: {', '.join(config.notify_on)}")
     print(f"Email: {'enabled' if config.email_enabled else 'disabled'}")
+    print(f"Telegram: {'enabled' if config.telegram_enabled else 'disabled'}")
+    print(f"Webhook: {'enabled' if config.webhook_enabled else 'disabled'}")
     print(f"Optimization: {'enabled (every %d days)' % config.optimize_interval_days if config.optimize_enabled else 'disabled'}")
     if config.interval_minutes > 0:
         print(f"Recurring: every {config.interval_minutes} minutes")
