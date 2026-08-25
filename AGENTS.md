@@ -44,6 +44,7 @@ C:\Opencode4\
 ├── MULAI_SINI.txt                    → Baca ini dulu! Panduan untuk pengguna
 ├── start.bat                         → Launcher utama (Web UI, Chat AI, Scheduler)
 ├── LIHAT_HASIL.bat                   → Buka folder output di Explorer
+├── COPY_KE_DRIVE.bat                 → Copy project ke external drive/folder lain
 ├── data_prep.bat                     → Standalone data preparation launcher
 ├── index.html                        → HTML launcher (double-click untuk mulai)
 ├── BEI_Swing_Engine_v8.0_FINAL.md   # System prompt (sumber kebenaran)
@@ -70,6 +71,7 @@ C:\Opencode4\
 │   ├── USER_GUIDE.md                 # Comprehensive user guide (all features)
 │   ├── QUICK_GUIDE.md                # 1-page quick reference cheat sheet
 │   ├── STOPLOSS_GUIDE.md             # Stop loss guide for POEMS beginners
+│   ├── PORTABLE_GUIDE.md             # Portable usage guide (external drive)
 │   ├── BEI_Swing_Engine_v8.0_EXPECTED_OUTPUT_BBRI.md
 │   └── BEI_Swing_Engine_v8.0_FIXTURE_BBRI.md
 │

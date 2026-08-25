@@ -292,6 +292,7 @@ C:\Opencode4\
 ├── MULAI_SINI.txt                    # Baca ini dulu
 ├── start.bat                         # Launcher (3 opsi)
 ├── LIHAT_HASIL.bat                   # Buka folder output
+├── COPY_KE_DRIVE.bat                 # Copy ke external drive/folder lain
 ├── data_prep.bat                     # Standalone data prep launcher
 ├── index.html                        # HTML launcher
 ├── data_prep_app.py                  # Standalone CSV cleaner+merger (port 8503)
