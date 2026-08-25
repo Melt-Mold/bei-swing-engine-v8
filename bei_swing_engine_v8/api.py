@@ -37,8 +37,16 @@ _log = get_logger("api")
 
 app = FastAPI(
     title="BEI Swing Engine v8.0 API",
-    description="Deterministic swing trading analysis for Indonesian stocks (BEI)",
+    description="Deterministic swing trading analysis for Indonesian stocks (BEI/Bursa Efek Indonesia). "
+    "Upload OHLCV CSV or fetch from Yahoo Finance to get swing-trading analysis with "
+    "BUY/HOLD/SELL/WAIT/NO_SETUP decisions.",
     version="8.0.0",
+    openapi_tags=[
+        {"name": "info", "description": "API info and health check"},
+        {"name": "analysis", "description": "Technical analysis and screening"},
+        {"name": "backtest", "description": "Walk-forward and portfolio backtesting"},
+        {"name": "data", "description": "CSV cleaning and merging utilities"},
+    ],
 )
 
 
@@ -70,7 +78,7 @@ class FetchRequest(BaseModel):
 # Endpoints
 # ============================================================
 
-@app.get("/")
+@app.get("/", tags=["info"])
 async def root():
     """API info."""
     return {
@@ -89,13 +97,13 @@ async def root():
     }
 
 
-@app.get("/health")
+@app.get("/health", tags=["info"])
 async def health():
     """Health check."""
     return {"status": "ok", "engine": "BEI Swing Engine v8.0"}
 
 
-@app.post("/analyze")
+@app.post("/analyze", tags=["analysis"], summary="Analyze uploaded CSV(s)")
 async def analyze(
     files: List[UploadFile] = File(...),
     mode: str = Form("A"),
@@ -139,7 +147,7 @@ async def analyze(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/screening")
+@app.post("/screening", tags=["analysis"], summary="Multi-ticker screening")
 async def screening(
     files: List[UploadFile] = File(...),
     modal: float = Form(10000000),
@@ -179,7 +187,7 @@ async def screening(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/backtest")
+@app.post("/backtest", tags=["backtest"], summary="Run walk-forward backtest")
 async def backtest(
     file: UploadFile = File(...),
     step: int = Form(1),
@@ -215,7 +223,7 @@ async def backtest(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/portfolio")
+@app.post("/portfolio", tags=["backtest"], summary="Run portfolio backtest")
 async def portfolio(
     files: List[UploadFile] = File(...),
     step: int = Form(1),
@@ -265,7 +273,7 @@ async def portfolio(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/clean")
+@app.post("/clean", tags=["data"], summary="Clean raw CSV")
 async def clean_csv(
     file: UploadFile = File(...),
 ):
@@ -289,7 +297,7 @@ async def clean_csv(
     }
 
 
-@app.post("/merge")
+@app.post("/merge", tags=["data"], summary="Merge CSV data")
 async def merge_csv_endpoint(
     existing: UploadFile = File(...),
     new_files: List[UploadFile] = File(...),
@@ -318,7 +326,7 @@ async def merge_csv_endpoint(
     }
 
 
-@app.get("/fetch/{ticker}")
+@app.get("/fetch/{ticker}", tags=["analysis"], summary="Fetch from Yahoo Finance and analyze")
 async def fetch_and_analyze(
     ticker: str,
     period: str = Query("1y", pattern="^(1mo|3mo|6mo|1y|2y|5y|10y|ytd|max)$"),

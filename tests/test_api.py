@@ -143,3 +143,45 @@ class TestAPI:
     def test_fetch_invalid_interval(self, client):
         response = client.get("/fetch/BBRI?interval=invalid")
         assert response.status_code == 422
+
+    def test_openapi_schema_available(self, client):
+        response = client.get("/openapi.json")
+        assert response.status_code == 200
+        schema = response.json()
+        assert schema["info"]["title"] == "BEI Swing Engine v8.0 API"
+        assert schema["info"]["version"] == "8.0.0"
+
+    def test_openapi_schema_has_all_endpoints(self, client):
+        response = client.get("/openapi.json")
+        schema = response.json()
+        paths = schema.get("paths", {})
+        expected_endpoints = [
+            ("/", "get"),
+            ("/health", "get"),
+            ("/analyze", "post"),
+            ("/screening", "post"),
+            ("/backtest", "post"),
+            ("/portfolio", "post"),
+            ("/clean", "post"),
+            ("/merge", "post"),
+        ]
+        for path, method in expected_endpoints:
+            assert path in paths, f"Path {path} missing from OpenAPI schema"
+            assert method in paths[path], f"Method {method.upper()} {path} missing from OpenAPI schema"
+        # fetch/{ticker} path
+        fetch_paths = [p for p in paths if p.startswith("/fetch/")]
+        assert len(fetch_paths) >= 1, "GET /fetch/{ticker} endpoint missing"
+
+    def test_openapi_schema_has_tags(self, client):
+        response = client.get("/openapi.json")
+        schema = response.json()
+        tags = [t["name"] for t in schema.get("tags", [])]
+        assert "info" in tags
+        assert "analysis" in tags
+        assert "backtest" in tags
+        assert "data" in tags
+
+    def test_swagger_ui_available(self, client):
+        response = client.get("/docs")
+        assert response.status_code == 200
+        assert "swagger" in response.text.lower()

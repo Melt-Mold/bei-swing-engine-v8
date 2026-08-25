@@ -85,7 +85,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi setup (6 tipe)
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # Unit tests (275 test, 30 file)
+├── tests/                            # Unit tests (279 test, 30 file)
 │   ├── __init__.py
 │   ├── conftest.py                   # Shared fixtures
 │   ├── test_api.py
@@ -177,7 +177,7 @@ load_ohlcv() → validate_data() → compute_all_indicators() → analyze_struct
 | `portfolio.py` | Multi-ticker portfolio backtest dengan equal-weight / risk-based allocation |
 | `optimizer.py` | Walk-forward parameter grid search & in-sample/out-of-sample validation |
 | `scheduler.py` | Auto-fetch + analyze harian, notifikasi sinyal BUY/SELL |
-| `api.py` | REST API endpoints (FastAPI) untuk analyze, screen, clean, merge, backtest |
+| `api.py` | REST API endpoints (FastAPI) untuk analyze, screen, clean, merge, backtest. Swagger UI di `/docs`, OpenAPI JSON di `/openapi.json` |
 | `cli.py` | Command-line interface untuk run.py |
 | `logging_config.py` | Structured logging factory |
 | `market_context.py` | IHSG regime detection (opsional context only) |
@@ -212,7 +212,7 @@ Key dependencies: `pandas`, `numpy`, `openpyxl`, `jinja2`, `xhtml2pdf`, `pypdf`,
 .\venv\Scripts\python.exe scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
 ```
 
-**Current status:** 275 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
+**Current status:** 279 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
 
 ### CI/CD
 

@@ -4,7 +4,7 @@
 > Menghasilkan laporan swing-trading analysis dengan keputusan BUY/HOLD/SELL/WAIT/NO_SETUP.
 
 [![CI](https://github.com/user/bei-swing-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/user/bei-swing-engine/actions)
-[![Tests](https://img.shields.io/badge/tests-275%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-279%20passed-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-81%25-yellow)]()
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue)]()
 
@@ -330,9 +330,53 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi 6 setup
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # 275 unit tests (30 file)
+├── tests/                            # 279 unit tests (30 file)
 ├── data-csv-yfinance-cleaned/        # Sample data (9 file)
 └── output_test/                      # Sample output
+```
+
+---
+
+## REST API
+
+Jalankan API server:
+
+```powershell
+.\venv\Scripts\python.exe api_server_app.py --host 0.0.0.0 --port 8000
+```
+
+**Interactive API docs (Swagger UI):** http://localhost:8000/docs
+
+**OpenAPI JSON schema:** http://localhost:8000/openapi.json
+
+### Endpoints
+
+| Method | Path | Tag | Description |
+|---|---|---|---|
+| GET | `/` | info | API info |
+| GET | `/health` | info | Health check |
+| POST | `/analyze` | analysis | Analyze uploaded CSV(s) |
+| POST | `/screening` | analysis | Multi-ticker screening (MODE=C) |
+| GET | `/fetch/{ticker}` | analysis | Fetch from Yahoo Finance and analyze |
+| POST | `/backtest` | backtest | Walk-forward backtest |
+| POST | `/portfolio` | backtest | Portfolio backtest |
+| POST | `/clean` | data | Clean raw CSV |
+| POST | `/merge` | data | Merge existing + new CSV |
+
+### Examples
+
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Analyze CSV
+curl -X POST http://localhost:8000/analyze -F "files=@TLKM.csv" -F "mode=A"
+
+# Fetch and analyze from Yahoo Finance
+curl "http://localhost:8000/fetch/BBRI?period=1y&mode=C"
+
+# Multi-ticker screening
+curl -X POST http://localhost:8000/screening -F "files=@BBRI.csv" -F "files=@TLKM.csv"
 ```
 
 ---
@@ -394,9 +438,12 @@ docker-compose up engine   # One-off analysis TLKM
 
 # Linting
 .\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py chat_app.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
+
+# OpenAPI schema validation
+.\venv\Scripts\python.exe -m pytest tests/test_api.py -k openapi -v
 ```
 
-**Status:** 275 tests, all passing. Coverage: 81%. Linting: 0 errors.
+**Status:** 279 tests, all passing. Coverage: 81%. Linting: 0 errors.
 
 ---
 
