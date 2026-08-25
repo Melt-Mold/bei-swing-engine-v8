@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  # CLI analysis service (one-off commands)
+  engine:
+    build: .
+    image: bei-swing-engine:v8.0.0
+    container_name: bei-engine
+    volumes:
+      - ./data-csv-yfinance-cleaned:/app/data-csv-yfinance-cleaned:ro
+      - ./output:/app/output
+    command: >
+      python run.py
+      --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv
+      --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
+      --params "MODE=A\nHORIZON=SWING\nDIRECTION=BOTH\nPOSITION=NO_POSITION\nMODAL=10000000\nRISK=2\nOUTPUT=Chat\nIHSG=None"
+      --output-dir /app/output
+
+  # Streamlit Web UI
+  webui:
+    build: .
+    image: bei-swing-engine:v8.0.0
+    container_name: bei-webui
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data-csv-yfinance-cleaned:/app/data-csv-yfinance-cleaned:ro
+      - ./output:/app/output
+    command: ["streamlit", "run", "webui.py", "--server.port=8501", "--server.address=0.0.0.0"]
+
+  # Streamlit Chat AI
+  chat:
+    build: .
+    image: bei-swing-engine:v8.0.0
+    container_name: bei-chat
+    ports:
+      - "8502:8502"
+    volumes:
+      - ./data-csv-yfinance-cleaned:/app/data-csv-yfinance-cleaned:ro
+      - ./output:/app/output
+    command: ["streamlit", "run", "chat_app.py", "--server.port=8502", "--server.address=0.0.0.0"]
+
+  # FastAPI REST API server
+  api:
+    build: .
+    image: bei-swing-engine:v8.0.0
+    container_name: bei-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data-csv-yfinance-cleaned:/app/data-csv-yfinance-cleaned:ro
+      - ./output:/app/output
+    command: ["python", "api_server_app.py", "--host", "0.0.0.0", "--port", "8000"]

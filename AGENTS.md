@@ -30,6 +30,9 @@ python -m venv venv
 # Run Chat AI (template mode default; toggle LLM di sidebar jika punya API key)
 .\venv\Scripts\python.exe -m streamlit run chat_app.py
 
+# Run with Docker
+docker-compose up --build
+
 # Run tests
 .\venv\Scripts\python.exe -m pytest tests/ -v
 ```
@@ -49,6 +52,9 @@ C:\Opencode4\
 ├── optimizer_app.py                  # Standalone walk-forward optimizer CLI
 ├── api_server_app.py                 # Standalone REST API server CLI
 ├── requirements.txt                  # Dependencies
+├── Dockerfile                        # Docker image
+├── docker-compose.yml                # Docker Compose services
+├── .dockerignore                     # Docker ignore rules
 ├── AGENTS.md                         # File ini
 │
 ├── scripts/                          # Utility scripts
@@ -79,7 +85,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi setup (6 tipe)
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # Unit tests (257 test, 29 file)
+├── tests/                            # Unit tests (264 test, 30 file)
 │   ├── __init__.py
 │   ├── conftest.py                   # Shared fixtures
 │   ├── test_api.py
@@ -206,7 +212,7 @@ Key dependencies: `pandas`, `numpy`, `openpyxl`, `jinja2`, `xhtml2pdf`, `pypdf`,
 .\venv\Scripts\python.exe scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
 ```
 
-**Current status:** 257 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
+**Current status:** 264 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
 
 ### CI/CD
 

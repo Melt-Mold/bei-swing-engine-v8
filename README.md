@@ -4,7 +4,7 @@
 > Menghasilkan laporan swing-trading analysis dengan keputusan BUY/HOLD/SELL/WAIT/NO_SETUP.
 
 [![CI](https://github.com/user/bei-swing-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/user/bei-swing-engine/actions)
-[![Tests](https://img.shields.io/badge/tests-257%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-264%20passed-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-81%25-yellow)]()
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue)]()
 
@@ -78,6 +78,9 @@ python -m venv venv
 
 # 6. Atau jalankan Chat AI
 .\venv\Scripts\python.exe -m streamlit run chat_app.py
+
+# 7. Atau jalankan dengan Docker
+docker-compose up --build
 ```
 
 ---
@@ -295,6 +298,9 @@ C:\Opencode4\
 ├── scheduler_config.json             # Scheduler config
 ├── requirements.txt
 ├── setup.cfg                         # flake8 config
+├── Dockerfile                        # Docker image
+├── docker-compose.yml                # Docker Compose services
+├── .dockerignore                     # Docker ignore rules
 ├── .github/workflows/ci.yml          # GitHub Actions CI
 ├── AGENTS.md                         # Dokumentasi untuk coding agents
 ├── README.md                         # File ini
@@ -324,7 +330,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi 6 setup
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # 257 unit tests (29 file)
+├── tests/                            # 264 unit tests (30 file)
 ├── data-csv-yfinance-cleaned/        # Sample data (9 file)
 └── output_test/                      # Sample output
 ```
@@ -348,6 +354,31 @@ Fitur:
 
 ---
 
+## Docker
+
+Jalankan seluruh stack dengan Docker Compose:
+
+```powershell
+# Build dan jalankan semua services
+docker-compose up --build
+
+# Jalankan service tertentu saja
+docker-compose up webui    # Web UI di http://localhost:8501
+docker-compose up chat     # Chat AI di http://localhost:8502
+docker-compose up api      # REST API di http://localhost:8000
+docker-compose up engine   # One-off analysis TLKM
+```
+
+**Services yang tersedia:**
+| Service | Port | Deskripsi |
+|---|---|---|
+| `webui` | 8501 | Streamlit Web UI |
+| `chat` | 8502 | Streamlit Chat AI |
+| `api` | 8000 | FastAPI REST API |
+| `engine` | — | CLI analysis one-off |
+
+---
+
 ## Testing
 
 ```powershell
@@ -364,7 +395,7 @@ Fitur:
 .\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py chat_app.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
 ```
 
-**Status:** 257 tests, all passing. Coverage: 81%. Linting: 0 errors.
+**Status:** 264 tests, all passing. Coverage: 81%. Linting: 0 errors.
 
 ---
 
