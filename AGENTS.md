@@ -41,20 +41,22 @@ docker-compose up --build
 
 ```
 C:\Opencode4\
-├── BEI_Swing_Engine_v8.0_FINAL.md   # System prompt final (sumber kebenaran)
+├── MULAI_SINI.txt                    → Baca ini dulu! Panduan untuk pengguna
+├── start.bat                         → Launcher utama (Web UI, Chat AI, Scheduler)
+├── LIHAT_HASIL.bat                   → Buka folder output di Explorer
+├── data_prep.bat                     → Standalone data preparation launcher
+├── index.html                        → HTML launcher (double-click untuk mulai)
+├── BEI_Swing_Engine_v8.0_FINAL.md   # System prompt (sumber kebenaran)
 ├── run.py                            # Entry point CLI
-├── start.bat                         # Portable launcher (3 opsi: Web UI, Chat AI, Scheduler)
-├── data_prep.bat                     # Standalone data preparation launcher
-├── index.html                        # HTML launcher page (double-click untuk mulai)
-├── data_prep_app.py                  # Standalone CSV cleaner+merger (Streamlit, port 8503)
 ├── webui.py                          # Streamlit Web UI (4 mode)
 ├── chat_app.py                       # Streamlit Chat AI interface
-├── csv_cleaner_app.py                # Standalone CSV cleaner CLI
-├── csv_merger_app.py                 # Standalone CSV merger CLI
-├── scheduler_app.py                  # Standalone scheduler CLI (auto-fetch + notify)
-├── scheduler_config.json             # Scheduler default config
-├── optimizer_app.py                  # Standalone walk-forward optimizer CLI
+├── data_prep_app.py                  # Standalone CSV cleaner+merger (port 8503)
+├── csv_cleaner_app.py                # Standalone CSV cleaner (--xlsx export)
+├── csv_merger_app.py                 # Standalone CSV merger (--xlsx export)
+├── scheduler_app.py                  # Standalone scheduler CLI
+├── optimizer_app.py                  # Standalone optimizer CLI
 ├── api_server_app.py                 # Standalone REST API server CLI
+├── scheduler_config.json             # Scheduler config (10 blue chip + email)
 ├── requirements.txt                  # Dependencies
 ├── Dockerfile                        # Docker image
 ├── docker-compose.yml                # Docker Compose services
@@ -66,7 +68,10 @@ C:\Opencode4\
 │
 ├── docs/                             # Documentation
 │   ├── USER_GUIDE.md                 # Comprehensive user guide (all features)
-│   └── QUICK_GUIDE.md                # 1-page quick reference cheat sheet
+│   ├── QUICK_GUIDE.md                # 1-page quick reference cheat sheet
+│   ├── STOPLOSS_GUIDE.md             # Stop loss guide for POEMS beginners
+│   ├── BEI_Swing_Engine_v8.0_EXPECTED_OUTPUT_BBRI.md
+│   └── BEI_Swing_Engine_v8.0_FIXTURE_BBRI.md
 │
 ├── bei_swing_engine_v8/             # Engine package (21 modul + __init__)
 │   ├── __init__.py

@@ -1,0 +1,89 @@
+╔══════════════════════════════════════════════════════════╗
+║     BEI Swing Engine v8.0 — MULAI DARI SINI             ║
+║     Analisis Saham Indonesia (BEI)                       ║
+╚══════════════════════════════════════════════════════════╝
+
+    ┌─────────────────────────────────────────────┐
+    │  CARA PALING MUDAH (2 LANGKAH):            │
+    │                                              │
+    │  1. Double-click  start.bat                  │
+    │     → Pilih angka 1 (Web UI)                 │
+    │     → Browser terbuka otomatis               │
+    │                                              │
+    │  2. Atau double-click  index.html            │
+    │     → Klik kartu yang mau dipakai           │
+    └─────────────────────────────────────────────┘
+
+
+    ┌─────────────────────────────────────────────┐
+    │  APA ITU SETIAP FILE?                       │
+    │                                              │
+    │  start.bat         → Launcher utama          │
+    │                     (Web UI, Chat AI,        │
+    │                      Scheduler)              │
+    │                                              │
+    │  index.html       → Launcher visual          │
+    │                     (double-click di browser)│
+    │                                              │
+    │  data_prep.bat     → Tool siapkan data CSV   │
+    │                     (clean + merge + XLSX)   │
+    │                                              │
+    │  scheduler_config.json                       │
+    │                     → Setting scheduler     │
+    │                       (ticker, email, dll)   │
+    └─────────────────────────────────────────────┘
+
+
+    ┌─────────────────────────────────────────────┐
+    │  FOLDER PENTING                             │
+    │                                              │
+    │  docs/            → Panduan lengkap         │
+    │    USER_GUIDE.md     (semua fitur)          │
+    │    QUICK_GUIDE.md    (1 halaman cheat sheet)│
+    │    STOPLOSS_GUIDE.md (panduan SL di POEMS)  │
+    │                                              │
+    │  data-csv-yfinance-cleaned/                 │
+    │                     → Data saham siap pakai │
+    │                                              │
+    │  data-csv-yfinance-5y/                       │
+    │                     → Data 5 tahun (testing)│
+    │                                              │
+    │  data-scheduled/  → Data hasil scheduler    │
+    │                                              │
+    │  output/           → Hasil analisis &        │
+    │                       laporan + sinyal       │
+    │                                              │
+    │  bei_swing_engine_v8/                       │
+    │                     → Engine code (jangan    │
+    │                       diubah kalau tidak     │
+    │                       paham Python)          │
+    └─────────────────────────────────────────────┘
+
+
+    ┌─────────────────────────────────────────────┐
+    │  WORKFLOW HARIAN                             │
+    │                                              │
+    │  Pagi:  start.bat → 3 (Scheduler)            │
+    │         → Email sinyal BUY/SELL              │
+    │         → Buka POEMS, eksekusi               │
+    │                                              │
+    │  Sore:  start.bat → 1 (Web UI)               │
+    │         → Upload data terbaru               │
+    │         → Analisis Mode A                    │
+    │         → Cek HOLD/SELL untuk posisi         │
+    └─────────────────────────────────────────────┘
+
+
+    ┌─────────────────────────────────────────────┐
+    │  BUTUH BANTUAN?                              │
+    │                                              │
+    │  Baca: docs/QUICK_GUIDE.md                   │
+    │  Atau: docs/USER_GUIDE.md                    │
+    │  SL:    docs/STOPLOSS_GUIDE.md               │
+    │                                              │
+    │  Pertanyaan umum: docs/USER_GUIDE.md (FAQ)  │
+    └─────────────────────────────────────────────┘
+
+
+    Disclaimer: Analisis bersifat edukatif.
+    BUKAN rekomendasi investasi.
