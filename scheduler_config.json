@@ -1,8 +1,15 @@
 {
   "tickers": [
-    "BBRI",
     "BBCA",
-    "TLKM"
+    "BBRI",
+    "BMRI",
+    "TLKM",
+    "ICBP",
+    "INDF",
+    "ADRO",
+    "HRUM",
+    "PTRO",
+    "PGAS"
   ],
   "ihsg": true,
   "period": "1y",
@@ -19,8 +26,8 @@
   },
   "output_dir": "output",
   "data_dir": "data-scheduled",
-  "email_enabled": false,
-  "email_smtp_host": "",
+  "email_enabled": true,
+  "email_smtp_host": "smtp.gmail.com",
   "email_smtp_port": 587,
   "email_user": "",
   "email_password": "",
