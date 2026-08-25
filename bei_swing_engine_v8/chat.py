@@ -187,7 +187,7 @@ def parse_user_intent(message: str) -> Dict[str, str]:
     """
     msg_lower = message.lower().strip()
 
-    if any(k in msg_lower for k in ["analisis", "analisa", "analyz", "check", "cek"]):
+    if any(k in msg_lower for k in ["analisis", "analisa", "analyz", "check", "cek"]) and not any(k in msg_lower for k in ["screen", "screening", "filter", "saring"]):
         # Try extract ticker like BBRI, TLKM, BBCA.JK, etc.
         # Strip common command words first to avoid matching them as tickers.
         import re
@@ -196,6 +196,15 @@ def parse_user_intent(message: str) -> Dict[str, str]:
         match = re.search(r"\b([A-Z]{3,5})(?:\.JK)?\b", cleaned)
         ticker = match.group(1) if match else ""
         return {"intent": "analyze", "ticker": ticker}
+
+    if any(k in msg_lower for k in ["screen", "screening", "filter", "saring", "bandingkan"]):
+        # Extract all tickers from message
+        import re
+        matches = re.findall(r"\b([A-Z]{3,5})(?:\.JK)?\b", message.upper())
+        # Filter out command words
+        command_words = {"SCREEN", "SCREENING", "FILTER", "SARING", "BANDINGKAN", "SAHAM", "TICKERS", "TICKER"}
+        tickers = [m for m in matches if m not in command_words]
+        return {"intent": "screen", "tickers": tickers}
 
     if any(k in msg_lower for k in ["reason code", "kode alasan", "alasan"]):
         return {"intent": "explain_reason_codes", "ticker": ""}
@@ -210,6 +219,68 @@ def parse_user_intent(message: str) -> Dict[str, str]:
         return {"intent": "explain_locked", "ticker": ""}
 
     return {"intent": "general", "ticker": ""}
+
+
+# ---------------------------------------------------------------------------
+# Screening (multi-ticker) support
+# ---------------------------------------------------------------------------
+def explain_screening_summary(summary_data: List[Dict]) -> ChatResponse:
+    """Format a screening summary list into a conversational chat response."""
+    if not summary_data:
+        return ChatResponse(
+            summary="Tidak ada hasil screening.",
+            detail="",
+            trade_plan="",
+            disclaimer="",
+        )
+
+    lines = [
+        f"### Hasil Screening ({len(summary_data)} ticker)",
+        "",
+        "| Ticker | Decision | Thesis | Setup | Tradeability |",
+        "|---|---|---|---|---|",
+    ]
+    buy_count = 0
+    sell_count = 0
+    wait_count = 0
+    nosetup_count = 0
+
+    for row in summary_data:
+        ticker = row.get("ticker", "?")
+        decision = row.get("decision", "N/A")
+        thesis = row.get("thesis", "N/A")
+        setup = row.get("setup", "N/A")
+        tradeability = row.get("tradeability", "N/A")
+        lines.append(f"| {ticker} | {decision} | {thesis} | {setup} | {tradeability} |")
+
+        if decision == "BUY":
+            buy_count += 1
+        elif decision == "SELL":
+            sell_count += 1
+        elif decision == "WAIT":
+            wait_count += 1
+        elif decision in {"NO_SETUP", "INSUFFICIENT_DATA"}:
+            nosetup_count += 1
+
+    summary = (
+        f"**Screening selesai untuk {len(summary_data)} ticker.**\n"
+        f"- BUY: {buy_count} | SELL: {sell_count} | WAIT: {wait_count} | NO_SETUP: {nosetup_count}"
+    )
+
+    detail = "\n".join(lines)
+
+    disclaimer = (
+        "**Disclaimer:** Analisis ini bersifat edukatif untuk pembelajaran analisis teknikal, "
+        "BUKAN rekomendasi investasi atau ajakan untuk membeli/menjual efek. "
+        "Keputusan investasi dan risiko sepenuhnya menjadi tanggung jawab pengguna."
+    )
+
+    return ChatResponse(
+        summary=summary,
+        detail=detail,
+        trade_plan="",
+        disclaimer=disclaimer,
+    )
 
 
 # ---------------------------------------------------------------------------

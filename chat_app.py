@@ -19,10 +19,10 @@ import streamlit as st
 # Add repository root to import path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from bei_swing_engine_v8.engine import analyze_ticker, parse_params, default_params
+from bei_swing_engine_v8.engine import analyze_ticker, run_analysis, parse_params, default_params
 from bei_swing_engine_v8.data import load_ohlcv, load_ihsg
 from bei_swing_engine_v8.fetcher import fetch_and_save, VALID_PERIODS
-from bei_swing_engine_v8.chat import explain_decision, explain_decision_with_llm, explain_general, parse_user_intent
+from bei_swing_engine_v8.chat import explain_decision, explain_decision_with_llm, explain_general, explain_screening_summary, parse_user_intent
 from bei_swing_engine_v8.logging_config import setup_logging
 
 
@@ -41,6 +41,58 @@ def get_default_params():
     p["MODE"] = "A"
     p["OUTPUT"] = "Chat"
     return p
+
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data-csv-yfinance-cleaned")
+
+
+def find_or_fetch_csv(ticker: str, tmpdir: str) -> str:
+    """Find existing cleaned CSV for ticker, or fetch from Yahoo Finance."""
+    candidates = [
+        os.path.join(DATA_DIR, f"{ticker}.JK_cleaned.csv"),
+        os.path.join(DATA_DIR, f"{ticker}_cleaned.csv"),
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return c
+    # Fetch from Yahoo
+    result = fetch_and_save(ticker, period="1y", interval="1d", output_dir=tmpdir)
+    if result.error:
+        return ""
+    return os.path.join(tmpdir, result.output_name)
+
+
+def run_screening(tickers: list, ihsg_path: str = None) -> dict:
+    """Run multi-ticker screening and return summary_data list."""
+    if not tickers:
+        return {"error": "No tickers provided for screening."}
+
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmpdir:
+        data_paths = []
+        failed = []
+        for t in tickers:
+            path = find_or_fetch_csv(t, tmpdir)
+            if path:
+                data_paths.append(path)
+            else:
+                failed.append(t)
+
+        if not data_paths:
+            return {"error": f"Could not load data for any ticker: {failed}"}
+
+        ihsg_path_to_use = ihsg_path
+        if not ihsg_path_to_use:
+            default_ihsg = os.path.join(DATA_DIR, "IHSG-JKSE_cleaned.csv")
+            if os.path.exists(default_ihsg):
+                ihsg_path_to_use = default_ihsg
+
+        params_text = "MODE=C\nHORIZON=SWING\nDIRECTION=BOTH\nPOSITION=NO_POSITION\nMODAL=10000000\nRISK=2\nOUTPUT=Chat\nIHSG=None"
+        try:
+            markdown_output = run_analysis(data_paths, params_text=params_text, ihsg_path=ihsg_path_to_use)
+            return {"markdown": markdown_output, "failed": failed}
+        except Exception as e:
+            return {"error": str(e)}
 
 
 def run_analysis_for_ticker(ticker: str, ihsg_path: str = None) -> dict:
@@ -185,7 +237,30 @@ def main():
         intent = parse_user_intent(user_input)
 
         with st.chat_message("assistant"):
-            if intent["intent"] == "analyze":
+            if intent["intent"] == "screen":
+                tickers = intent.get("tickers", [])
+                if not tickers:
+                    st.warning("Ticker tidak dikenali. Contoh: 'Screening BBRI TLKM BBCA'")
+                    response_text = "Ticker tidak dikenali. Silakan sebutkan ticker seperti 'Screening BBRI TLKM BBCA'."
+                else:
+                    with st.spinner(f"Screening {len(tickers)} ticker..."):
+                        result = run_screening(tickers, ihsg_path=ihsg_path)
+
+                    if "error" in result:
+                        st.error(f"Gagal screening: {result['error']}")
+                        response_text = f"Maaf, screening gagal: {result['error']}"
+                    else:
+                        st.markdown(result["markdown"])
+                        failed = result.get("failed", [])
+                        extra = f"\n\nTicker gagal: {', '.join(failed)}" if failed else ""
+                        response_text = result["markdown"] + extra
+                        st.info(
+                            "**Disclaimer:** Analisis ini bersifat edukatif untuk pembelajaran analisis teknikal, "
+                            "BUKAN rekomendasi investasi atau ajakan untuk membeli/menjual efek. "
+                            "Keputusan investasi dan risiko sepenuhnya menjadi tanggung jawab pengguna."
+                        )
+
+            elif intent["intent"] == "analyze":
                 ticker = intent["ticker"]
                 if not ticker:
                     st.warning("Ticker tidak dikenali. Contoh: 'Analisis BBRI'")

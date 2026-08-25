@@ -4,7 +4,7 @@
 > Menghasilkan laporan swing-trading analysis dengan keputusan BUY/HOLD/SELL/WAIT/NO_SETUP.
 
 [![CI](https://github.com/user/bei-swing-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/user/bei-swing-engine/actions)
-[![Tests](https://img.shields.io/badge/tests-269%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-275%20passed-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-81%25-yellow)]()
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue)]()
 
@@ -330,7 +330,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi 6 setup
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # 269 unit tests (30 file)
+├── tests/                            # 275 unit tests (30 file)
 ├── data-csv-yfinance-cleaned/        # Sample data (9 file)
 └── output_test/                      # Sample output
 ```
@@ -348,6 +348,7 @@ Jalankan chat interface:
 Fitur:
 - Chat dengan asisten analisis teknikal untuk saham Indonesia.
 - Ketik ticker (contoh: `Analisis BBRI`) atau upload CSV.
+- Screening multi-ticker (contoh: `Screening BBRI TLKM BBCA`).
 - Penjelasan default pakai template deterministic (anti-hallucination).
 - Toggle **LLM backend** di sidebar untuk menggunakan OpenAI API key — jika LLM gagal, otomatis fallback ke template.
 - Engine Python selalu menghasilkan angka dan keputusan; chat AI hanya menjelaskan hasil.
@@ -395,7 +396,7 @@ docker-compose up engine   # One-off analysis TLKM
 .\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py chat_app.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
 ```
 
-**Status:** 269 tests, all passing. Coverage: 81%. Linting: 0 errors.
+**Status:** 275 tests, all passing. Coverage: 81%. Linting: 0 errors.
 
 ---
 

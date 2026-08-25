@@ -8,6 +8,7 @@ from bei_swing_engine_v8.chat import (
     explain_decision_with_llm,
     explain_general,
     explain_reason_codes,
+    explain_screening_summary,
     parse_user_intent,
     REASON_CODE_MEANING,
 )
@@ -105,6 +106,49 @@ class TestChatExplainer:
             "SELL-01", "SELL-02", "SELL-03", "SELL-04",
         }
         assert required.issubset(set(REASON_CODE_MEANING.keys()))
+
+
+class TestChatScreening:
+    def test_parse_screening_intent(self):
+        intent = parse_user_intent("Screening BBRI TLKM BBCA")
+        assert intent["intent"] == "screen"
+        assert "BBRI" in intent["tickers"]
+        assert "TLKM" in intent["tickers"]
+        assert "BBCA" in intent["tickers"]
+
+    def test_parse_screening_intent_indonesian(self):
+        intent = parse_user_intent("Saring saham BBRI TLKM")
+        assert intent["intent"] == "screen"
+        assert "BBRI" in intent["tickers"]
+        assert "TLKM" in intent["tickers"]
+
+    def test_parse_screening_intent_filter(self):
+        intent = parse_user_intent("Filter BBCA BMRI")
+        assert intent["intent"] == "screen"
+        assert len(intent["tickers"]) == 2
+
+    def test_explain_screening_summary(self):
+        data = [
+            {"ticker": "BBRI", "decision": "BUY", "thesis": "BULLISH", "setup": "Breakout TRIGGERED", "tradeability": "TRADEABLE"},
+            {"ticker": "TLKM", "decision": "WAIT", "thesis": "BULLISH", "setup": "Pullback DEVELOPING", "tradeability": "NOT_APPLICABLE"},
+            {"ticker": "BBCA", "decision": "NO_SETUP", "thesis": "NEUTRAL", "setup": "None NONE", "tradeability": "NOT_APPLICABLE"},
+        ]
+        response = explain_screening_summary(data)
+        assert "3 ticker" in response.summary
+        assert "BUY: 1" in response.summary
+        assert "WAIT: 1" in response.summary
+        assert "BBRI" in response.detail
+        assert "TLKM" in response.detail
+        assert "Disclaimer" in response.disclaimer
+
+    def test_explain_screening_summary_empty(self):
+        response = explain_screening_summary([])
+        assert "Tidak ada" in response.summary
+
+    def test_analyze_not_screening_when_single_ticker(self):
+        # "Analisis BBRI" should be analyze, not screen
+        intent = parse_user_intent("Analisis BBRI")
+        assert intent["intent"] == "analyze"
 
 
 class TestChatLLM:

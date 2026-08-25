@@ -85,7 +85,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi setup (6 tipe)
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # Unit tests (269 test, 30 file)
+├── tests/                            # Unit tests (275 test, 30 file)
 │   ├── __init__.py
 │   ├── conftest.py                   # Shared fixtures
 │   ├── test_api.py
@@ -212,7 +212,7 @@ Key dependencies: `pandas`, `numpy`, `openpyxl`, `jinja2`, `xhtml2pdf`, `pypdf`,
 .\venv\Scripts\python.exe scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
 ```
 
-**Current status:** 269 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
+**Current status:** 275 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
 
 ### CI/CD
 
@@ -275,6 +275,7 @@ Parameter berikut di-lock di `BEI_Swing_Engine_v8.0_FINAL.md` section 5. **Janga
 
 ### Chat AI
 - `chat_app.py` menyediakan interface chat Streamlit.
+- Mendukung: analisis ticker tunggal (`Analisis BBRI`), screening multi-ticker (`Screening BBRI TLKM BBCA`), upload CSV.
 - Default explanation menggunakan template deterministic di `chat.py` — tidak ada hallucination risk.
 - Toggle di sidebar memungkinkan penggunaan LLM backend (OpenAI-compatible API). Jika LLM gagal, otomatis fallback ke template mode.
 - Chat AI **tidak pernah menghitung indikator sendiri**; selalu memanggil engine Python untuk analisis angka.
