@@ -322,8 +322,8 @@ def build_indicator_table(df: pd.DataFrame, indicators: Dict, structure=None) ->
     if obv_div:
         div_parts.append(f"OBV: {obv_div}")
     div_text = "; ".join(div_parts) if div_parts else "None"
-    div_badge = "⚡ Div" if div_parts else ""
-    add("STRUCTURE", "Divergence Scan", div_text, div_badge, div_text, "Regular/Hidden Bullish/Bearish on RSI/MACD/OBV")
+    # Divergence is displayed in Value/Interpretation, not as a confluence badge
+    add("STRUCTURE", "Divergence Scan", div_text, "", div_text, "Regular/Hidden Bullish/Bearish on RSI/MACD/OBV")
 
     # Simple candlestick detection
     candle = detect_candlestick_pattern(df)

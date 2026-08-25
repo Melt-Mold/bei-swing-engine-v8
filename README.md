@@ -319,7 +319,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi 6 setup
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # 234 unit tests (27 file)
+├── tests/                            # 245 unit tests (28 file)
 ├── data-csv-yfinance-cleaned/        # Sample data (9 file)
 └── output_test/                      # Sample output
 ```
@@ -339,10 +339,10 @@ C:\Opencode4\
 .\venv\Scripts\python.exe -m pytest tests/ --cov=bei_swing_engine_v8 --cov-report=html
 
 # Linting
-.\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py --count --statistics
+.\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
 ```
 
-**Status:** 234 tests, all passing. Coverage: 81%. Linting: 0 errors.
+**Status:** 245 tests, all passing. Coverage: 81%. Linting: 0 errors.
 
 ---
 

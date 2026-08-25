@@ -346,7 +346,7 @@ If a confluence factor value is `N/A` (e.g., SMA200 unavailable due to insuffici
 | 33 | Ichimoku Senkou A | No | (Tenkan + Kijun) / 2, shifted +26 |
 | 34 | Ichimoku Senkou B(52) | No | (HH52 + LL52) / 2, shifted +26 |
 | 35 | Ichimoku Chikou | No | Close shifted −26 |
-| 36 | Divergence Scan | ⚡ Div only | Regular/Hidden Bullish/Bearish on RSI/MACD/OBV |
+| 36 | Divergence Scan | No | Regular/Hidden Bullish/Bearish on RSI/MACD/OBV; alert shown in Value/Interpretation |
 | 37 | Candlestick (Tier 1) | No | Hammer, Engulfing, Doji, etc. |
 | 38 | Chart Patterns (Tier 2) | No | Double Top/Bottom, H&S, Triangle, Wedge, etc. |
 

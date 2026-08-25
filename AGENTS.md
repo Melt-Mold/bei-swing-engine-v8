@@ -47,6 +47,9 @@ C:\Opencode4\
 ├── requirements.txt                  # Dependencies
 ├── AGENTS.md                         # File ini
 │
+├── scripts/                          # Utility scripts
+│   └── verify_final_compliance.py    # FINAL.md contract compliance checker
+│
 ├── bei_swing_engine_v8/             # Engine package (21 modul + __init__)
 │   ├── __init__.py
 │   ├── api.py                        # REST API endpoints (FastAPI)
@@ -71,7 +74,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi setup (6 tipe)
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # Unit tests (234 test, 27 file)
+├── tests/                            # Unit tests (245 test, 28 file)
 │   ├── __init__.py
 │   ├── conftest.py                   # Shared fixtures
 │   ├── test_api.py
@@ -190,10 +193,14 @@ Key dependencies: `pandas`, `numpy`, `openpyxl`, `jinja2`, `xhtml2pdf`, `pypdf`,
 .\venv\Scripts\python.exe -m pytest tests/ --cov=bei_swing_engine_v8 --cov-report=term-missing
 
 # Linting
-.\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py --count --statistics
+.\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
+
+# FINAL.md compliance
+.\venv\Scripts\python.exe scripts/verify_final_compliance.py --locked
+.\venv\Scripts\python.exe scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
 ```
 
-**Current status:** 234 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
+**Current status:** 245 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
 
 ### CI/CD
 
@@ -201,6 +208,7 @@ GitHub Actions workflow di `.github/workflows/ci.yml` menjalankan:
 - Test suite pada Python 3.11, 3.12, 3.13 (Windows)
 - Coverage report (XML + HTML artifact)
 - flake8 linting pada semua source files
+- `scripts/verify_final_compliance.py` — locked-parameter + end-to-end compliance check
 
 ## Coding Conventions
 
@@ -271,6 +279,33 @@ Parameter berikut di-lock di `BEI_Swing_Engine_v8.0_FINAL.md` section 5. **Janga
 3. **SMA200 sufficiency cap** — jika < 200 bars, setup maksimal CONFIRMED (tidak TRIGGERED), tradeability UNTRADEABLE.
 4. **Historical as-of analysis** — hanya data ≤ cutoff D, no look-ahead. `Engine(truncated at D) == Engine(complete data as-of D)`.
 5. **SL priority** — Structural invalidation → S/R level → ATR fallback (2.0×ATR14). Jangan pilih SL arbitrary demi R/R favorable.
+
+## Pre-Commit Checklist
+
+Sebelum commit perubahan, jalankan:
+
+1. **Tests**
+   ```powershell
+   .\venv\Scripts\python.exe -m pytest tests/ -q
+   ```
+
+2. **Linting**
+   ```powershell
+   .\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
+   ```
+
+3. **FINAL.md Compliance**
+   ```powershell
+   .\venv\Scripts\python.exe scripts/verify_final_compliance.py --locked
+   .\venv\Scripts\python.exe scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
+   .\venv\Scripts\python.exe scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/BBRI.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
+   ```
+
+4. **Manual review** (jika mengubah output/report)
+   - Apakah 42-row table masih 6 kolom?
+   - Apakah badge count tepat 16?
+   - Apakah decision memiliki reason code valid?
+   - Apakah disclaimer ada di Mode A?
 
 ## Files to Update When Modifying
 

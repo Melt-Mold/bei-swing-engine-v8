@@ -73,20 +73,52 @@ jobs:
 
       - name: Run flake8
         run: |
-          flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py --count --statistics
+          flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
+
+  compliance:
+    name: FINAL.md Compliance
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run locked-parameter checks
+        run: |
+          python scripts/verify_final_compliance.py --locked
+
+      - name: Run end-to-end compliance on sample tickers
+        run: |
+          python scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
+          python scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/BBRI.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
 
   summary:
     name: CI Summary
     runs-on: windows-latest
-    needs: [test, lint]
+    needs: [test, lint, compliance]
     if: always()
     steps:
       - name: Check results
         run: |
           echo "Test result: ${{ needs.test.result }}"
           echo "Lint result: ${{ needs.lint.result }}"
+          echo "Compliance result: ${{ needs.compliance.result }}"
           if [ "${{ needs.test.result }}" != "success" ]; then
             echo "Tests failed!"
+            exit 1
+          fi
+          if [ "${{ needs.compliance.result }}" != "success" ]; then
+            echo "Compliance checks failed!"
             exit 1
           fi
         shell: bash
