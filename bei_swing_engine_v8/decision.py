@@ -289,9 +289,14 @@ def run_decision_engine(
     tradeability: Tradeability,
     params: Dict,
     position_branch: str = "NO_POSITION",
+    held_position_direction: str = "LONG",
 ) -> Decision:
     """
     Run full decision engine for a given position branch.
+
+    Args:
+        held_position_direction: Direction of an existing held position.
+            Only used when position_branch == "EXISTING_POSITION". Default LONG for backward compatibility.
     """
     dec = Decision(position_branch=position_branch)
     dec.primary_setup = setup
@@ -303,7 +308,25 @@ def run_decision_engine(
     dec.confluence_state = evidence_state
     thesis = derive_thesis(indicators, structure, setup, evidence_state)
 
-    # G0 DATA GATE already passed (caller responsibility)
+    # G0 DATA GATE
+    if len(df) < 20:
+        dec.thesis_state = "INSUFFICIENT"
+        dec.decision = "INSUFFICIENT_DATA"
+        dec.reason_codes.append("INS-D-01")
+        build_decision_trace(dec, setup)
+        return dec
+
+    required_indicators = ["ema9", "sma20", "sma50", "sma200", "atr14", "rsi14"]
+    if any(
+        indicators.get(k) is None or len(indicators[k]) == 0 or pd.isna(indicators[k].iloc[-1])
+        for k in required_indicators
+    ):
+        dec.thesis_state = "INSUFFICIENT"
+        dec.decision = "INSUFFICIENT_DATA"
+        dec.reason_codes.append("INS-D-02")
+        build_decision_trace(dec, setup)
+        return dec
+
     # G1 DIRECTION ELIGIBILITY
     direction = params.get("DIRECTION", "BOTH")
     if setup.direction not in {"NONE", direction} and direction != "BOTH":
@@ -327,8 +350,12 @@ def run_decision_engine(
     # G3 SETUP ACTIONABILITY
     if setup.status in {"DEVELOPING", "NONE"}:
         dec.thesis_state = derive_thesis(indicators, structure, setup, evidence_state)
-        dec.decision = "WAIT"
-        dec.reason_codes.append("WAIT-01")
+        if dec.thesis_state == "NEUTRAL":
+            dec.decision = "NO_SETUP"
+            dec.reason_codes.append("NOSETUP-01")
+        else:
+            dec.decision = "WAIT"
+            dec.reason_codes.append("WAIT-01")
         build_decision_trace(dec, setup)
         return dec
 
@@ -345,7 +372,7 @@ def run_decision_engine(
     has_structure_or_price = any(d[0] in {"Structure", "Price Location"} for d in aligned_dims)
     evidence_contract_met = len(aligned_dims) >= 2 and has_structure_or_price
 
-    if not evidence_contract_met and setup.status == "TRIGGERED":
+    if not evidence_contract_met and setup.status in {"CONFIRMED", "TRIGGERED"}:
         dec.thesis_state = thesis
         dec.decision = "WAIT"
         dec.reason_codes.append("WAIT-05")
@@ -356,7 +383,14 @@ def run_decision_engine(
     if tradeability.state == "UNTRADEABLE":
         dec.thesis_state = thesis
         dec.decision = "WAIT"
-        dec.reason_codes.append(tradeability.reason.split(":")[0] if tradeability.reason else "WAIT-02")
+        reason = tradeability.reason
+        if reason and reason.startswith("VETO-"):
+            dec.vetoes_triggered.append(reason)
+            dec.reason_codes.append(reason.split(":")[0])
+        elif reason and reason.startswith("WAIT-"):
+            dec.reason_codes.append(reason.split(":")[0])
+        else:
+            dec.reason_codes.append("WAIT-02")
         build_decision_trace(dec, setup)
         return dec
 
@@ -391,20 +425,37 @@ def run_decision_engine(
             dec.reason_codes.append("WAIT-01")
 
     elif position_branch == "EXISTING_POSITION":
-        # Assume held position aligned with thesis
+        # held_position_direction tells us which position the user currently holds.
         if setup.status == "INVALIDATED":
             dec.decision = "SELL"
+            dec.decision_direction = held_position_direction
             dec.reason_codes.append("SELL-01")
-        elif tradeability.state in {"TRADEABLE", "TRADEABLE_WITH_WARNING"} and setup.direction != "LONG":
-            # Confirmed opposing setup
+        elif setup.status == "FAILED":
+            if held_position_direction != setup.direction and thesis != "NEUTRAL":
+                # Failed setup with opposing outcome vs held position
+                dec.decision = "SELL"
+                dec.decision_direction = held_position_direction
+                dec.reason_codes.append("SELL-03")
+            else:
+                # Setup failed but thesis still supports held position
+                dec.decision = "HOLD"
+                dec.decision_direction = held_position_direction
+                dec.reason_codes.append("HOLD-03")
+        elif tradeability.state in {"TRADEABLE", "TRADEABLE_WITH_WARNING"} and setup.direction != held_position_direction:
+            # Confirmed opposing setup vs held position
             dec.decision = "SELL"
+            dec.decision_direction = held_position_direction
             dec.reason_codes.append("SELL-02")
         elif dec.thesis_state == "NEUTRAL":
             dec.decision = "HOLD"
+            dec.decision_direction = held_position_direction
             dec.reason_codes.append("HOLD-02")
         else:
+            # Thesis intact; check warnings for HOLD-01 vs HOLD-02
+            warnings = check_warnings(indicators, setup, tradeability, evidence_state)
             dec.decision = "HOLD"
-            dec.reason_codes.append("HOLD-01")
+            dec.decision_direction = held_position_direction
+            dec.reason_codes.append("HOLD-02" if warnings else "HOLD-01")
 
     else:  # UNKNOWN
         dec.decision = "WAIT"
@@ -435,6 +486,13 @@ def build_decision_trace(dec: Decision, setup: Setup):
         "warnings": dec.warnings,
         "vetoes_triggered": dec.vetoes_triggered,
         "reason_codes": dec.reason_codes,
+        "trade_plan": {
+            "entry": dec.entry,
+            "sl": dec.sl,
+            "tp1": dec.tp1,
+            "tp2": dec.tp2,
+            "rr_raw": dec.rr_raw,
+        },
     }
 
 

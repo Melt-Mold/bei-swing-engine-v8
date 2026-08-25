@@ -160,12 +160,15 @@ def analyze_ticker(
     # Decision based on POSITION
     position = params.get("POSITION", "UNKNOWN")
 
+    held_direction = params.get("HELD_DIRECTION", "LONG")
     if position == "UNKNOWN":
+        # Infer held direction from setup/thesis for dual-branch comparison
+        inferred_held = primary_setup.direction if primary_setup.direction in {"LONG", "SHORT"} else held_direction
         no_pos_dec = run_decision_engine(df, indicators, structure, primary_setup, tradeability, params, position_branch="NO_POSITION")
-        existing_dec = run_decision_engine(df, indicators, structure, primary_setup, tradeability, params, position_branch="EXISTING_POSITION")
+        existing_dec = run_decision_engine(df, indicators, structure, primary_setup, tradeability, params, position_branch="EXISTING_POSITION", held_position_direction=inferred_held)
         decision = combine_unknown_branch(no_pos_dec, existing_dec)
     else:
-        decision = run_decision_engine(df, indicators, structure, primary_setup, tradeability, params, position_branch=position)
+        decision = run_decision_engine(df, indicators, structure, primary_setup, tradeability, params, position_branch=position, held_position_direction=held_direction)
 
     _log.info("decision | ticker=%s decision=%s direction=%s thesis=%s reason_codes=%s",
               ticker, decision.decision, decision.decision_direction, decision.thesis_state, decision.reason_codes)

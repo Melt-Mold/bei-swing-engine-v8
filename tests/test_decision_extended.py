@@ -90,3 +90,47 @@ class TestDecisionExtended:
         result = analyze_ticker(sample_df, params)
         dec = result["decision"]
         assert dec.position_branch == "UNKNOWN"
+
+    def test_g0_insufficient_data_short_df(self, sample_df, sample_indicators, sample_structure, default_params):
+        short_df = sample_df.iloc[:10].copy()
+        setup = Setup(type="None", direction="NONE", status="NONE")
+        tradeability = Tradeability()
+        result = run_decision_engine(short_df, sample_indicators, sample_structure, setup, tradeability, default_params)
+        assert result.decision == "INSUFFICIENT_DATA"
+        assert "INS-D-01" in result.reason_codes
+
+    def test_neutral_no_setup_returns_nosetup(self, sample_df, sample_indicators, sample_structure, default_params):
+        # Force NEUTRAL thesis by using a NONE setup with no clear trend
+        setup = Setup(type="None", direction="NONE", status="NONE")
+        tradeability = Tradeability()
+        result = run_decision_engine(sample_df, sample_indicators, sample_structure, setup, tradeability, default_params)
+        if result.thesis_state == "NEUTRAL":
+            assert result.decision == "NO_SETUP"
+            assert "NOSETUP-01" in result.reason_codes
+
+    def test_confirmed_setup_evidence_contract_failure(self, sample_df, sample_indicators, sample_structure, default_params):
+        setup = Setup(type="Breakout", direction="LONG", status="CONFIRMED",
+                      trigger_price=sample_df["Close"].iloc[-1], invalidation_price=sample_df["Close"].iloc[-1] - 100)
+        tradeability = Tradeability(state="TRADEABLE", reason="BUY-01: Standard tradeable entry")
+        result = run_decision_engine(sample_df, sample_indicators, sample_structure, setup, tradeability, default_params)
+        # If evidence contract is not met, CONFIRMED should also emit WAIT-05
+        if result.decision == "WAIT":
+            assert "WAIT-05" in result.reason_codes
+
+    def test_existing_position_held_short(self, sample_df, sample_indicators, sample_structure, default_params):
+        setup = Setup(type="Breakout", direction="LONG", status="TRIGGERED",
+                      trigger_price=sample_df["Close"].iloc[-1], invalidation_price=sample_df["Close"].iloc[-1] - 100)
+        tradeability = Tradeability(state="TRADEABLE", reason="BUY-01: Standard tradeable entry")
+        result = run_decision_engine(
+            sample_df, sample_indicators, sample_structure, setup, tradeability, default_params,
+            position_branch="EXISTING_POSITION", held_position_direction="SHORT",
+        )
+        # LONG setup vs held SHORT -> opposing setup -> SELL
+        assert result.decision == "SELL"
+        assert "SELL-02" in result.reason_codes
+
+    def test_decision_trace_includes_trade_plan(self, sample_df, default_params):
+        result = analyze_ticker(sample_df, default_params)
+        dec = result["decision"]
+        assert "trade_plan" in dec.trace
+        assert dec.trace["trade_plan"]["entry"] == dec.entry

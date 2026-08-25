@@ -417,7 +417,7 @@ Badge is visual annotation only. Confluence state is determined by cross-dimensi
 
 ```text
 G0 DATA GATE
-   ↓ FATAL → stop; INSUFFICIENT → INSUFFICIENT_DATA
+   ↓ FATAL/INSUFFICIENT (<20 bars or critical indicators NaN) → INSUFFICIENT_DATA
 G1 DIRECTION ELIGIBILITY
    ↓ setup direction not permitted → NO_SETUP
 G2 STRUCTURAL VETO
@@ -473,13 +473,14 @@ Precedence (first match wins):
 |---|---|---|---|
 | E1 | Decision inputs insufficient | INSUFFICIENT_DATA | INS-D-01/02 |
 | E2 | Active structural invalidation vs held thesis | SELL | SELL-01 |
-| E3 | Confirmed/TRIGGERED opposing setup | SELL | SELL-02 |
+| E3 | Confirmed/TRIGGERED opposing setup vs held position | SELL | SELL-02 |
 | E4 | Failed held-thesis setup + confirmed opposing outcome | SELL | SELL-03 |
 | E5 | Held-thesis setup FAILED, thesis intact | HOLD + warning | HOLD-03 |
 | E6 | Thesis intact, soft warnings | HOLD + warnings | HOLD-02 |
 | E7 | Thesis intact, no warnings | HOLD | HOLD-01 |
 
 **Rules:**
+- The held position direction is provided via the `HELD_DIRECTION` parameter (default LONG).
 - Exits (E2–E4) do NOT require R/R calculation.
 - TP reached = advisory HOLD, not automatic exit.
 - Pyramiding = execution layer; analytical decision remains HOLD.
@@ -487,7 +488,7 @@ Precedence (first match wins):
 ## 8.5 UNKNOWN Position — Dual-Branch Rule
 
 1. Compute NO_POSITION branch (Matrix N).
-2. Compute EXISTING_POSITION branch (Matrix E), assuming held position aligned with current thesis.
+2. Compute EXISTING_POSITION branch (Matrix E), assuming held position aligned with current thesis/setup. The held direction is inferred from `HELD_DIRECTION` or from the primary setup direction when `POSITION=UNKNOWN`.
 3. If branches agree → use that state.
 4. If branches differ → render both explicitly.
 
