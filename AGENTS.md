@@ -27,6 +27,9 @@ python -m venv venv
 # Run Web UI
 .\venv\Scripts\python.exe -m streamlit run webui.py
 
+# Run Chat AI
+.\venv\Scripts\python.exe -m streamlit run chat_app.py
+
 # Run tests
 .\venv\Scripts\python.exe -m pytest tests/ -v
 ```
@@ -38,6 +41,7 @@ C:\Opencode4\
 ├── BEI_Swing_Engine_v8.0_FINAL.md   # System prompt final (sumber kebenaran)
 ├── run.py                            # Entry point CLI
 ├── webui.py                          # Streamlit Web UI (4 mode)
+├── chat_app.py                       # Streamlit Chat AI interface
 ├── csv_cleaner_app.py                # Standalone CSV cleaner CLI
 ├── csv_merger_app.py                 # Standalone CSV merger CLI
 ├── scheduler_app.py                  # Standalone scheduler CLI (auto-fetch + notify)
@@ -55,6 +59,7 @@ C:\Opencode4\
 │   ├── api.py                        # REST API endpoints (FastAPI)
 │   ├── backtest.py                   # Walk-forward backtest
 │   ├── charts.py                     # Plotly visualization
+│   ├── chat.py                       # Chat AI explainer (deterministic templates)
 │   ├── cleaner.py                    # CSV cleaner (port dari TA V2.15)
 │   ├── cli.py                        # Command-line interface
 │   ├── data.py                       # Ingesti & validasi OHLCV
@@ -74,7 +79,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi setup (6 tipe)
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # Unit tests (245 test, 28 file)
+├── tests/                            # Unit tests (255 test, 29 file)
 │   ├── __init__.py
 │   ├── conftest.py                   # Shared fixtures
 │   ├── test_api.py
@@ -161,6 +166,7 @@ load_ohlcv() → validate_data() → compute_all_indicators() → analyze_struct
 | `merger.py` | `merge_csv()`, `merge_csv_files()` — append data baru ke existing |
 | `fetcher.py` | `fetch_yfinance()`, `fetch_and_save()` — download dari Yahoo Finance |
 | `charts.py` | `plot_equity_curve()`, `plot_price_with_trades()`, `plot_drawdown()`, `plot_r_multiples()` |
+| `chat.py` | Deterministic chat explainer using FINAL.md terminology |
 | `patterns.py` | Double Top/Bottom, Head & Shoulders, Triangle, Wedge detection |
 | `portfolio.py` | Multi-ticker portfolio backtest dengan equal-weight / risk-based allocation |
 | `optimizer.py` | Walk-forward parameter grid search & in-sample/out-of-sample validation |
@@ -193,14 +199,14 @@ Key dependencies: `pandas`, `numpy`, `openpyxl`, `jinja2`, `xhtml2pdf`, `pypdf`,
 .\venv\Scripts\python.exe -m pytest tests/ --cov=bei_swing_engine_v8 --cov-report=term-missing
 
 # Linting
-.\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
+.\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py chat_app.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
 
 # FINAL.md compliance
 .\venv\Scripts\python.exe scripts/verify_final_compliance.py --locked
 .\venv\Scripts\python.exe scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
 ```
 
-**Current status:** 245 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
+**Current status:** 255 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
 
 ### CI/CD
 
@@ -291,7 +297,7 @@ Sebelum commit perubahan, jalankan:
 
 2. **Linting**
    ```powershell
-   .\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
+   .\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py chat_app.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
    ```
 
 3. **FINAL.md Compliance**

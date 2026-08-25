@@ -4,7 +4,7 @@
 > Menghasilkan laporan swing-trading analysis dengan keputusan BUY/HOLD/SELL/WAIT/NO_SETUP.
 
 [![CI](https://github.com/user/bei-swing-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/user/bei-swing-engine/actions)
-[![Tests](https://img.shields.io/badge/tests-234%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-255%20passed-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-81%25-yellow)]()
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue)]()
 
@@ -75,6 +75,9 @@ python -m venv venv
 
 # 5. Atau jalankan Web UI
 .\venv\Scripts\python.exe -m streamlit run webui.py
+
+# 6. Atau jalankan Chat AI
+.\venv\Scripts\python.exe -m streamlit run chat_app.py
 ```
 
 ---
@@ -283,6 +286,7 @@ C:\Opencode4\
 ├── BEI_Swing_Engine_v8.0_FINAL.md   # System prompt (sumber kebenaran)
 ├── run.py                            # Entry point CLI
 ├── webui.py                          # Streamlit Web UI
+├── chat_app.py                       # Streamlit Chat AI interface
 ├── csv_cleaner_app.py                # Standalone CSV cleaner
 ├── csv_merger_app.py                 # Standalone CSV merger
 ├── scheduler_app.py                  # Standalone scheduler
@@ -300,6 +304,7 @@ C:\Opencode4\
 │   ├── api.py                        # REST API endpoints (FastAPI)
 │   ├── backtest.py                   # Walk-forward backtest
 │   ├── charts.py                     # Plotly visualization
+│   ├── chat.py                       # Chat AI explainer
 │   ├── cleaner.py                    # CSV cleaner
 │   ├── cli.py                        # CLI interface
 │   ├── data.py                       # Ingesti & validasi OHLCV
@@ -319,7 +324,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi 6 setup
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # 245 unit tests (28 file)
+├── tests/                            # 255 unit tests (29 file)
 ├── data-csv-yfinance-cleaned/        # Sample data (9 file)
 └── output_test/                      # Sample output
 ```
@@ -339,10 +344,10 @@ C:\Opencode4\
 .\venv\Scripts\python.exe -m pytest tests/ --cov=bei_swing_engine_v8 --cov-report=html
 
 # Linting
-.\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
+.\venv\Scripts\python.exe -m flake8 bei_swing_engine_v8/ tests/ run.py webui.py chat_app.py csv_cleaner_app.py csv_merger_app.py scheduler_app.py api_server_app.py optimizer_app.py scripts/verify_final_compliance.py --count --statistics
 ```
 
-**Status:** 245 tests, all passing. Coverage: 81%. Linting: 0 errors.
+**Status:** 255 tests, all passing. Coverage: 81%. Linting: 0 errors.
 
 ---
 
