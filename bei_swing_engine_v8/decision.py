@@ -338,14 +338,32 @@ def run_decision_engine(
         return dec
 
     # G2 STRUCTURAL VETO
-    # Active structural invalidation vs setup direction
-    # (Simplified: if setup invalidated)
+    # VETO-01: Setup itself is invalidated
     if setup.status == "INVALIDATED":
         dec.decision = "NO_SETUP"
         dec.reason_codes.append("VETO-01")
         dec.vetoes_triggered.append("VETO-01: Invalidated setup")
         build_decision_trace(dec, setup)
         return dec
+
+    # VETO-02: Active structural invalidation vs setup direction
+    # If structure trend direction opposes setup direction, veto the setup
+    if structure and setup.direction in {"LONG", "SHORT"}:
+        struct_trend = structure.trend_structure if structure else ""
+        if setup.direction == "LONG" and "Downtrend" in struct_trend:
+            dec.thesis_state = thesis
+            dec.decision = "NO_SETUP"
+            dec.reason_codes.append("VETO-02")
+            dec.vetoes_triggered.append("VETO-02: Structural invalidation vs LONG entry")
+            build_decision_trace(dec, setup)
+            return dec
+        elif setup.direction == "SHORT" and "Uptrend" in struct_trend:
+            dec.thesis_state = thesis
+            dec.decision = "NO_SETUP"
+            dec.reason_codes.append("VETO-02")
+            dec.vetoes_triggered.append("VETO-02: Structural invalidation vs SHORT entry")
+            build_decision_trace(dec, setup)
+            return dec
 
     # G3 SETUP ACTIONABILITY
     if setup.status in {"DEVELOPING", "NONE"}:
@@ -409,7 +427,22 @@ def run_decision_engine(
     dec.thesis_state = thesis
 
     if position_branch == "NO_POSITION":
-        if setup.status in {"CONFIRMED", "TRIGGERED"} and tradeability.state in {"TRADEABLE", "TRADEABLE_WITH_WARNING"} and evidence_contract_met:
+        # BUY-03: Range-boundary entry under neutral structure
+        if (
+            thesis == "NEUTRAL"
+            and setup.type == "Range"
+            and setup.status == "TRIGGERED"
+            and tradeability.state in {"TRADEABLE", "TRADEABLE_WITH_WARNING"}
+            and evidence_contract_met
+        ):
+            if setup.direction == "LONG":
+                dec.decision = "BUY"
+                dec.decision_direction = "LONG"
+            elif setup.direction == "SHORT":
+                dec.decision = "SELL"
+                dec.decision_direction = "SHORT"
+            dec.reason_codes.append("BUY-03")
+        elif setup.status in {"CONFIRMED", "TRIGGERED"} and tradeability.state in {"TRADEABLE", "TRADEABLE_WITH_WARNING"} and evidence_contract_met:
             if setup.direction == "LONG":
                 dec.decision = "BUY"
                 dec.decision_direction = "LONG"

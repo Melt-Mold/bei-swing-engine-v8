@@ -20,6 +20,42 @@ from bei_swing_engine_v8.cleaner import clean_csv_file, clean_csv_text, rows_to_
 from bei_swing_engine_v8.logging_config import setup_logging
 
 
+def export_to_xlsx(output_dir: str, xlsx_path: str):
+    """Export all cleaned CSV files in output_dir to a single XLSX workbook (one sheet per ticker)."""
+    try:
+        import openpyxl
+        import pandas as pd
+    except ImportError:
+        print("ERROR: openpy+pandas required for XLSX export. Run: pip install openpyxl pandas")
+        return
+
+    csv_files = sorted(glob.glob(os.path.join(output_dir, "*_cleaned.csv")))
+    if not csv_files:
+        print("No cleaned CSV files found to export.")
+        return
+
+    wb = openpyxl.Workbook()
+    wb.remove(wb.active)  # Remove default sheet
+
+    for csv_path in csv_files:
+        sheet_name = os.path.basename(csv_path).replace("_cleaned.csv", "")
+        # Excel sheet name max 31 chars, no special chars
+        sheet_name = sheet_name[:31].replace("/", "_").replace("\\", "_")
+        ws = wb.create_sheet(title=sheet_name)
+
+        df = pd.read_csv(csv_path)
+        # Write header
+        for col_idx, col_name in enumerate(df.columns, 1):
+            ws.cell(row=1, column=col_idx, value=col_name)
+        # Write data
+        for row_idx, row in enumerate(df.itertuples(index=False), 2):
+            for col_idx, value in enumerate(row, 1):
+                ws.cell(row=row_idx, column=col_idx, value=value)
+
+    wb.save(xlsx_path)
+    print(f"XLSX archive saved: {xlsx_path} ({len(csv_files)} sheets)")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="SwingFlow v8.0 — Universal CSV Cleaner",
@@ -34,6 +70,7 @@ Examples:
     parser.add_argument("inputs", nargs="*", help="Input CSV file(s)")
     parser.add_argument("--glob", dest="glob_pattern", default=None, help="Glob pattern for input files")
     parser.add_argument("-o", "--output-dir", default=".", help="Output directory (default: current dir)")
+    parser.add_argument("--xlsx", action="store_true", help="Also export cleaned data to XLSX for archiving")
     parser.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
 
     args = parser.parse_args(argv)
@@ -79,6 +116,11 @@ Examples:
     print(f"Summary: {total_files} files cleaned, {total_rows} total rows, {errors} errors")
     if total_files > 0:
         print(f"Output directory: {os.path.abspath(args.output_dir)}")
+
+    # Export to XLSX if requested
+    if args.xlsx and total_files > 0:
+        xlsx_path = os.path.join(args.output_dir, "cleaned_archive.xlsx")
+        export_to_xlsx(args.output_dir, xlsx_path)
 
 
 if __name__ == "__main__":

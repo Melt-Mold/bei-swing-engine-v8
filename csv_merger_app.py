@@ -19,6 +19,31 @@ from bei_swing_engine_v8.merger import merge_csv_files
 from bei_swing_engine_v8.logging_config import setup_logging
 
 
+def export_merged_to_xlsx(csv_path: str, xlsx_path: str):
+    """Export merged CSV to XLSX for archiving."""
+    try:
+        import openpyxl
+        import pandas as pd
+    except ImportError:
+        print("ERROR: openpyxl+pandas required for XLSX export. Run: pip install openpyxl pandas")
+        return
+
+    df = pd.read_csv(csv_path)
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    sheet_name = os.path.basename(csv_path).replace("_cleaned.csv", "")[:31]
+    ws.title = sheet_name
+
+    for col_idx, col_name in enumerate(df.columns, 1):
+        ws.cell(row=1, column=col_idx, value=col_name)
+    for row_idx, row in enumerate(df.itertuples(index=False), 2):
+        for col_idx, value in enumerate(row, 1):
+            ws.cell(row=row_idx, column=col_idx, value=value)
+
+    wb.save(xlsx_path)
+    print(f"XLSX archive saved: {xlsx_path} ({len(df)} rows)")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="SwingFlow v8.0 — CSV Merger (Append New Data)",
@@ -33,6 +58,7 @@ Examples:
     parser.add_argument("-n", "--new", nargs="*", default=[], help="New raw CSV file(s) to merge")
     parser.add_argument("--glob", dest="glob_pattern", default=None, help="Glob pattern for new files")
     parser.add_argument("-o", "--output-dir", default=".", help="Output directory")
+    parser.add_argument("--xlsx", action="store_true", help="Also export merged data to XLSX for archiving")
     parser.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
 
     args = parser.parse_args(argv)
@@ -83,6 +109,11 @@ Examples:
 
     print()
     print(f"Output: {os.path.join(os.path.abspath(args.output_dir), result.output_name)}")
+
+    # Export to XLSX if requested
+    if args.xlsx:
+        xlsx_path = os.path.join(args.output_dir, result.output_name.replace(".csv", ".xlsx"))
+        export_merged_to_xlsx(os.path.join(args.output_dir, result.output_name), xlsx_path)
 
 
 if __name__ == "__main__":

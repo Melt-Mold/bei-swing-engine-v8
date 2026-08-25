@@ -43,6 +43,7 @@ docker-compose up --build
 C:\Opencode4\
 ├── BEI_Swing_Engine_v8.0_FINAL.md   # System prompt final (sumber kebenaran)
 ├── run.py                            # Entry point CLI
+├── start.bat                         # Portable launcher (auto-setup venv + menu)
 ├── webui.py                          # Streamlit Web UI (4 mode)
 ├── chat_app.py                       # Streamlit Chat AI interface
 ├── csv_cleaner_app.py                # Standalone CSV cleaner CLI
@@ -61,7 +62,8 @@ C:\Opencode4\
 │   └── verify_final_compliance.py    # FINAL.md contract compliance checker
 │
 ├── docs/                             # Documentation
-│   └── USER_GUIDE.md                 # Comprehensive user guide (all features)
+│   ├── USER_GUIDE.md                 # Comprehensive user guide (all features)
+│   └── QUICK_GUIDE.md                # 1-page quick reference cheat sheet
 │
 ├── bei_swing_engine_v8/             # Engine package (21 modul + __init__)
 │   ├── __init__.py
@@ -88,7 +90,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi setup (6 tipe)
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # Unit tests (288 test, 31 file)
+├── tests/                            # Unit tests (290 test, 31 file)
 │   ├── __init__.py
 │   ├── conftest.py                   # Shared fixtures
 │   ├── test_api.py
@@ -215,7 +217,7 @@ Key dependencies: `pandas`, `numpy`, `openpyxl`, `jinja2`, `xhtml2pdf`, `pypdf`,
 .\venv\Scripts\python.exe scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
 ```
 
-**Current status:** 288 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
+**Current status:** 290 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
 
 ### CI/CD
 

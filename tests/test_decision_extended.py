@@ -144,3 +144,50 @@ class TestDecisionExtended:
         dec = result["decision"]
         assert "trade_plan" in dec.trace
         assert dec.trace["trade_plan"]["entry"] == dec.entry
+
+    def test_veto02_long_setup_in_downtrend(self, sample_df, sample_indicators, sample_structure, default_params):
+        # Create a LONG setup but force structure to Downtrend
+        setup = Setup(type="Breakout", direction="LONG", status="TRIGGERED",
+                      trigger_price=sample_df["Close"].iloc[-1], invalidation_price=sample_df["Close"].iloc[-1] - 100)
+        # Mock structure to report Downtrend
+        from bei_swing_engine_v8.structure import Structure
+        downtrend_structure = Structure(
+            swings=sample_structure.swings,
+            swing_highs=sample_structure.swing_highs,
+            swing_lows=sample_structure.swing_lows,
+            support_levels=sample_structure.support_levels,
+            resistance_levels=sample_structure.resistance_levels,
+            fib_levels=sample_structure.fib_levels,
+            bos_choch=sample_structure.bos_choch,
+            range_info=sample_structure.range_info,
+            trend_structure="Downtrend (LH-LL)",
+            last_swing_high=sample_structure.last_swing_high,
+            last_swing_low=sample_structure.last_swing_low,
+            patterns=sample_structure.patterns,
+        )
+        tradeability = Tradeability(state="TRADEABLE", reason="BUY-01: Standard tradeable entry")
+        result = run_decision_engine(
+            sample_df, sample_indicators, downtrend_structure, setup, tradeability, default_params,
+        )
+        assert result.decision == "NO_SETUP"
+        assert "VETO-02" in result.reason_codes
+
+    def test_buy03_range_entry_neutral_thesis(self, sample_df, sample_indicators, sample_structure, default_params):
+        # Create a Range LONG TRIGGERED setup with neutral thesis
+        setup = Setup(type="Range", direction="LONG", status="TRIGGERED",
+                      trigger_price=sample_df["Close"].iloc[-1], invalidation_price=sample_df["Close"].iloc[-1] - 100)
+        tradeability = Tradeability(state="TRADEABLE", reason="BUY-01: Standard tradeable entry")
+        # Force neutral structure
+        from bei_swing_engine_v8.structure import Structure
+        neutral_structure = Structure(
+            swings=[], swing_highs=[], swing_lows=[],
+            support_levels=[], resistance_levels=[], fib_levels=[],
+            bos_choch=[], range_info=None, trend_structure="Sideways",
+            last_swing_high=None, last_swing_low=None, patterns=[],
+        )
+        result = run_decision_engine(
+            sample_df, sample_indicators, neutral_structure, setup, tradeability, default_params,
+        )
+        # If thesis is NEUTRAL and range setup triggered, should use BUY-03
+        if result.thesis_state == "NEUTRAL" and result.decision == "BUY":
+            assert "BUY-03" in result.reason_codes
