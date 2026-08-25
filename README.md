@@ -4,7 +4,7 @@
 > Menghasilkan laporan swing-trading analysis dengan keputusan BUY/HOLD/SELL/WAIT/NO_SETUP.
 
 [![CI](https://github.com/user/bei-swing-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/user/bei-swing-engine/actions)
-[![Tests](https://img.shields.io/badge/tests-285%20passed-brightgreen)]()
+[![Tests](https://img.shields.io/badge/tests-288%20passed-brightgreen)]()
 [![Coverage](https://img.shields.io/badge/coverage-81%25-yellow)]()
 [![Python](https://img.shields.io/badge/python-3.13%2B-blue)]()
 
@@ -330,7 +330,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi 6 setup
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # 285 unit tests (30 file)
+├── tests/                            # 288 unit tests (31 file)
 ├── data-csv-yfinance-cleaned/        # Sample data (9 file)
 └── output_test/                      # Sample output
 ```
@@ -486,7 +486,7 @@ schtasks /create /tn "BEI_Swing_Scheduler" /tr "C:\Opencode4\venv\Scripts\python
 .\venv\Scripts\python.exe -m pytest tests/test_api.py -k openapi -v
 ```
 
-**Status:** 285 tests, all passing. Coverage: 81%. Linting: 0 errors.
+**Status:** 288 tests, all passing. Coverage: 81%. Linting: 0 errors.
 
 ---
 

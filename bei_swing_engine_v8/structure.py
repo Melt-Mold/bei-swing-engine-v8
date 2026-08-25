@@ -85,17 +85,40 @@ def find_swings(df: pd.DataFrame, n: int = SWING_FRACTAL_N) -> List[Swing]:
     Find swing highs and lows using n-bar fractal.
     A swing high at i if High[i] == max(High[i-n:i+n+1]).
     A swing low at i if Low[i] == min(Low[i-n:i+n+1]).
+
+    Optimized: uses numpy sliding_window_view for vectorized computation.
     """
-    highs = df["High"]
-    lows = df["Low"]
+    from numpy.lib.stride_tricks import sliding_window_view
+
+    high_arr = df["High"].to_numpy()
+    low_arr = df["Low"].to_numpy()
+    dates = df.index
+
+    window = 2 * n + 1
+    if len(high_arr) < window:
+        return []
+
+    # Vectorized rolling max/min over 2n+1 window
+    high_windows = sliding_window_view(high_arr, window)
+    low_windows = sliding_window_view(low_arr, window)
+
+    window_max = high_windows.max(axis=1)
+    window_min = low_windows.min(axis=1)
+
+    # Center of window j is at position j+n
+    centers_high = high_arr[n:n + len(window_max)]
+    centers_low = low_arr[n:n + len(window_min)]
+
+    swing_high_mask = centers_high == window_max
+    swing_low_mask = centers_low == window_min
 
     swings = []
-    for i in range(n, len(df) - n):
-        idx = df.index[i]
-        if highs.iloc[i] == highs.iloc[i - n:i + n + 1].max():
-            swings.append(Swing(idx=i, date=idx, price=highs.iloc[i], kind="high"))
-        elif lows.iloc[i] == lows.iloc[i - n:i + n + 1].min():
-            swings.append(Swing(idx=i, date=idx, price=lows.iloc[i], kind="low"))
+    for j in range(len(window_max)):
+        idx = j + n
+        if swing_high_mask[j]:
+            swings.append(Swing(idx=idx, date=dates[idx], price=float(centers_high[j]), kind="high"))
+        elif swing_low_mask[j]:
+            swings.append(Swing(idx=idx, date=dates[idx], price=float(centers_low[j]), kind="low"))
 
     return swings
 
@@ -369,15 +392,12 @@ def detect_range(df: pd.DataFrame, supports: List[Dict], resistances: List[Dict]
         return None
 
     # Find first touch date approximately by checking when price was near support/resistance
-    upper_touches = 0
-    lower_touches = 0
-    for i in range(len(df)):
-        h = df["High"].iloc[i]
-        l = df["Low"].iloc[i]
-        if abs(h - upper) <= height * 0.05:
-            upper_touches += 1
-        if abs(l - lower) <= height * 0.05:
-            lower_touches += 1
+    # Optimized: vectorized numpy instead of per-bar iloc loop
+    high_arr = df["High"].to_numpy()
+    low_arr = df["Low"].to_numpy()
+    upper_tol = height * 0.05
+    upper_touches = int(np.sum(np.abs(high_arr - upper) <= upper_tol))
+    lower_touches = int(np.sum(np.abs(low_arr - lower) <= upper_tol))
 
     if upper_touches < 2 or lower_touches < 2:
         return None
