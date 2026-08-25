@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEI Swing Engine v8.0</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #e0e0e0;
+        }
+        .container {
+            max-width: 700px;
+            width: 90%;
+            padding: 40px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.2em;
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #a0a0b0;
+            font-size: 1.1em;
+        }
+        .warning {
+            background: #2d2d44;
+            border-left: 4px solid #ffd700;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+            color: #c0c0d0;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 30px 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: #00d4ff;
+            transform: translateY(-3px);
+        }
+        .card .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        .card h2 {
+            font-size: 1.3em;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+        .card p {
+            color: #a0a0b0;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #1a1a2e;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1em;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+        .btn.gray {
+            background: linear-gradient(135deg, #555, #333);
+            color: #fff;
+        }
+        .footer {
+            text-align: center;
+            color: #606080;
+            font-size: 0.8em;
+            margin-top: 30px;
+            line-height: 1.6;
+        }
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 0.9em;
+        }
+        .status a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+        .status a:hover { text-decoration: underline; }
+        .offline {
+            color: #ff6b6b;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+        .online {
+            color: #51cf66;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>BEI Swing Engine v8.0</h1>
+            <p>Deterministic swing trading analysis untuk saham Indonesia</p>
+        </div>
+
+        <div class="warning">
+            <strong>Petunjuk:</strong> Klik salah satu tombol di bawah untuk memulai.
+            Aplikasi akan terbuka di browser baru. Tutup halaman ini setelah aplikasi berjalan.
+            Tekan <strong>Ctrl+C</strong> di jendela command prompt untuk menghentikan.
+        </div>
+
+        <div class="cards">
+            <div class="card" onclick="launch('webui')">
+                <div class="icon">📊</div>
+                <h2>Web UI</h2>
+                <p>Analisis saham di browser. Upload CSV atau fetch dari Yahoo Finance. Hasil: laporan lengkap dengan grafik.</p>
+                <div class="btn">Mulai</div>
+            </div>
+
+            <div class="card" onclick="launch('chat')">
+                <div class="icon">💬</div>
+                <h2>Chat AI</h2>
+                <p>Chat dengan asisten analisis saham. Ketik "Analisis BBRI" atau "Screening BBRI TLKM".</p>
+                <div class="btn">Mulai</div>
+            </div>
+
+            <div class="card" onclick="launch('api')">
+                <div class="icon">🔌</div>
+                <h2>REST API</h2>
+                <p>API server untuk integrasi sistem. Swagger UI interaktif di /docs.</p>
+                <div class="btn gray">Mulai</div>
+            </div>
+
+            <div class="card" onclick="launch('data')">
+                <div class="icon">🧹</div>
+                <h2>Data Preparation</h2>
+                <p>Bersihkan dan gabungkan CSV dari Yahoo Finance. Standalone, tidak perlu engine.</p>
+                <div class="btn gray">Mulai</div>
+            </div>
+
+            <div class="card full-width" onclick="launch('scheduler')">
+                <div class="icon">⏰</div>
+                <h2>Scheduler Otomatis</h2>
+                <p>Auto-fetch data harian, analisis, dan kirim notifikasi sinyal BUY/SELL via Email/Telegram/Webhook.</p>
+                <div class="btn gray">Mulai</div>
+            </div>
+        </div>
+
+        <div class="status" id="status">
+            <span class="offline" id="status-text">Aplikasi belum berjalan. Klik tombol di atas untuk memulai.</span>
+        </div>
+
+        <div class="footer">
+            <p>BEI Swing Engine v8.0 — <a href="https://github.com/Melt-Mold/bei-swing-engine-v8" style="color:#00d4ff;">GitHub</a></p>
+            <p>Disclaimer: Analisis bersifat edukatif, BUKAN rekomendasi investasi.</p>
+        </div>
+    </div>
+
+    <script>
+        function launch(app) {
+            const apps = {
+                'webui': { url: 'http://localhost:8501', bat: 'webui' },
+                'chat': { url: 'http://localhost:8501', bat: 'chat' },
+                'api': { url: 'http://localhost:8000/docs', bat: 'api' },
+                'data': { url: 'http://localhost:8503', bat: 'data' },
+                'scheduler': { url: null, bat: 'scheduler' }
+            };
+            const config = apps[app];
+            if (!config) return;
+
+            // Launch the batch file (works when opened from file:// in Windows)
+            const link = document.createElement('a');
+            link.href = 'start.bat';
+            link.click();
+
+            // Show status
+            const statusEl = document.getElementById('status-text');
+            if (config.url) {
+                statusEl.innerHTML = 'Memulai... Tunggu 5-10 detik, lalu buka: <a href="' + config.url + '" target="_blank">' + config.url + '</a>';
+                statusEl.className = 'online';
+            } else {
+                statusEl.innerHTML = 'Scheduler akan berjalan di command prompt. Ikuti instruksi di layar.';
+                statusEl.className = 'online';
+            }
+        }
+    </script>
+</body>
+</html>

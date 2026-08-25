@@ -43,7 +43,10 @@ docker-compose up --build
 C:\Opencode4\
 ├── BEI_Swing_Engine_v8.0_FINAL.md   # System prompt final (sumber kebenaran)
 ├── run.py                            # Entry point CLI
-├── start.bat                         # Portable launcher (auto-setup venv + menu)
+├── start.bat                         # Portable launcher (3 opsi: Web UI, Chat AI, Scheduler)
+├── data_prep.bat                     # Standalone data preparation launcher
+├── index.html                        # HTML launcher page (double-click untuk mulai)
+├── data_prep_app.py                  # Standalone CSV cleaner+merger (Streamlit, port 8503)
 ├── webui.py                          # Streamlit Web UI (4 mode)
 ├── chat_app.py                       # Streamlit Chat AI interface
 ├── csv_cleaner_app.py                # Standalone CSV cleaner CLI

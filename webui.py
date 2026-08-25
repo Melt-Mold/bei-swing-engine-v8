@@ -41,6 +41,30 @@ def main():
     st.title("📊 BEI Swing Engine v8.0")
     st.markdown("Deterministic swing trading analysis for Indonesian stocks (BEI)")
 
+    # Help expander for beginners
+    with st.expander("📖 Panduan Cepat (klik untuk buka)"):
+        st.markdown("""
+        **Cara pakai untuk pemula:**
+
+        1. **Pilih mode** di sidebar kiri → "Yahoo Finance Fetch" (paling mudah)
+        2. **Masukkan ticker** saham, contoh: `BBRI`, `TLKM`, `BBCA`
+        3. **Pilih periode** data: 1y, 2y, atau 5y
+        4. Klik **Analyze** → tunggu beberapa detik
+        5. Hasil muncul: **Decision** (BUY/HOLD/SELL/WAIT), trade plan, indikator
+
+        **Cara baca hasil:**
+        - **BUY** = Sinyal beli (LONG) atau sell short (SHORT)
+        - **SELL** = Keluar posisi
+        - **WAIT** = Tunggu konfirmasi
+        - **NO_SETUP** = Tidak ada setup yang valid
+
+        **Tips:**
+        - Upload IHSG CSV di sidebar untuk market context
+        - MODE A = laporan lengkap, MODE C = screening cepat
+        - RISK 2% = resiko 2% modal per trade
+        - Lihat `docs/QUICK_GUIDE.md` untuk cheat sheet lengkap
+        """)
+
     # Sidebar
     with st.sidebar:
         st.header("⚙️ Parameters")

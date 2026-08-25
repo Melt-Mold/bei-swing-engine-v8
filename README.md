@@ -290,7 +290,10 @@ IHSG=None
 C:\Opencode4\
 ├── BEI_Swing_Engine_v8.0_FINAL.md   # System prompt (sumber kebenaran)
 ├── run.py                            # Entry point CLI
-├── start.bat                         # Portable launcher (auto-setup + menu)
+├── start.bat                         # Portable launcher (3 opsi)
+├── data_prep.bat                     # Standalone data prep launcher
+├── index.html                        # HTML launcher (double-click untuk mulai)
+├── data_prep_app.py                  # Standalone CSV cleaner+merger (port 8503)
 ├── webui.py                          # Streamlit Web UI
 ├── chat_app.py                       # Streamlit Chat AI interface
 ├── csv_cleaner_app.py                # Standalone CSV cleaner (--xlsx export)
