@@ -60,6 +60,9 @@ C:\Opencode4\
 ├── scripts/                          # Utility scripts
 │   └── verify_final_compliance.py    # FINAL.md contract compliance checker
 │
+├── docs/                             # Documentation
+│   └── USER_GUIDE.md                 # Comprehensive user guide (all features)
+│
 ├── bei_swing_engine_v8/             # Engine package (21 modul + __init__)
 │   ├── __init__.py
 │   ├── api.py                        # REST API endpoints (FastAPI)

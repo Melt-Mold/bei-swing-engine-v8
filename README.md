@@ -33,6 +33,8 @@
 10. [FAQ](#faq)
 11. [Disclaimer](#disclaimer)
 
+> **Panduan lengkap:** Lihat `docs/USER_GUIDE.md` untuk tutorial detail semua fitur.
+
 ---
 
 ## Fitur Utama
