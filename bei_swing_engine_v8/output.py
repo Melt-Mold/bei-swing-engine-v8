@@ -433,13 +433,14 @@ def render_markdown(
         lines.append(f"- **Entry:** Rp {fmt_price(decision.entry)} | **SL:** Rp {fmt_price(decision.sl)} | **TP1:** Rp {fmt_price(decision.tp1)} | **TP2:** Rp {fmt_price(decision.tp2)} | **R/R:** {fmt_float(decision.rr_raw)}")
     lines.append("")
 
-    # Market Context
-    lines.append("## 2. Market Context (IHSG)")
-    lines.append("")
-    lines.append(f"- **Regime:** {market_regime['regime']}")
-    if market_regime['trend'] != "N/A":
-        lines.append(f"- **Trend IHSG:** {market_regime['trend']}")
-    lines.append("")
+    # Market Context (only if IHSG data uploaded)
+    if not str(market_regime.get('regime', '')).startswith('N/A'):
+        lines.append("## 2. Market Context (IHSG)")
+        lines.append("")
+        lines.append(f"- **Regime:** {market_regime['regime']}")
+        if market_regime['trend'] != "N/A":
+            lines.append(f"- **Trend IHSG:** {market_regime['trend']}")
+        lines.append("")
 
     # Market Structure
     lines.append("## 3. Market Structure")
@@ -718,12 +719,14 @@ def render_calc_only_markdown(
     lines.append(f"**Parameter:** MODE={params.get('MODE','B')}, HORIZON={params.get('HORIZON','SWING')}, DIRECTION={params.get('DIRECTION','BOTH')}, POSITION={params.get('POSITION','UNKNOWN')}, MODAL=Rp {params.get('MODAL',10000000):,.0f}, RISK={params.get('RISK',2)}%  ".replace(",", "."))
     lines.append("")
 
-    lines.append("## 1. Market Context (IHSG)")
-    lines.append("")
-    lines.append(f"- **Regime:** {market_regime['regime']}")
-    if market_regime['trend'] != "N/A":
-        lines.append(f"- **Trend IHSG:** {market_regime['trend']}")
-    lines.append("")
+    # Market Context (only if IHSG data uploaded)
+    if not str(market_regime.get('regime', '')).startswith('N/A'):
+        lines.append("## 1. Market Context (IHSG)")
+        lines.append("")
+        lines.append(f"- **Regime:** {market_regime['regime']}")
+        if market_regime['trend'] != "N/A":
+            lines.append(f"- **Trend IHSG:** {market_regime['trend']}")
+        lines.append("")
 
     lines.append("## 2. Market Structure")
     lines.append("")

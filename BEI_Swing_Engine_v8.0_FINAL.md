@@ -490,7 +490,7 @@ Precedence (first match wins):
 1. Compute NO_POSITION branch (Matrix N).
 2. Compute EXISTING_POSITION branch (Matrix E), assuming held position aligned with current thesis/setup. The held direction is inferred from `HELD_DIRECTION` or from the primary setup direction when `POSITION=UNKNOWN`.
 3. If branches agree → use that state.
-4. If branches differ → render both explicitly.
+4. If branches differ → render both explicitly. Reason codes from both branches are preserved in the combined decision.
 
 | NO_POSITION | EXISTING_POSITION | Top-level |
 |---|---|---|

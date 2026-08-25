@@ -32,11 +32,16 @@ class TestDecisionExtended:
         d1.thesis_state = "BULLISH"
         d1.evidence_state = "Weak"
         d1.confluence_state = "Weak"
+        d1.reason_codes = ["BUY-01"]
         d2 = Decision(decision="HOLD", position_branch="EXISTING_POSITION")
         d2.thesis_state = "BULLISH"
+        d2.reason_codes = ["HOLD-01"]
         result = combine_unknown_branch(d1, d2)
         assert result.decision == "WAIT"
         assert result.dual_branch is not None
+        # Reason codes should be preserved from both branches
+        assert "BUY-01" in result.reason_codes
+        assert "HOLD-01" in result.reason_codes
 
     def test_combine_unknown_sell(self):
         d1 = Decision(decision="WAIT", position_branch="NO_POSITION")
@@ -47,9 +52,14 @@ class TestDecisionExtended:
 
     def test_combine_unknown_no_setup_vs_hold(self):
         d1 = Decision(decision="NO_SETUP", position_branch="NO_POSITION")
+        d1.reason_codes = ["NOSETUP-01"]
         d2 = Decision(decision="HOLD", position_branch="EXISTING_POSITION")
+        d2.reason_codes = ["HOLD-01"]
         result = combine_unknown_branch(d1, d2)
         assert result.decision == "NO_SETUP"
+        # Reason codes preserved
+        assert "NOSETUP-01" in result.reason_codes
+        assert "HOLD-01" in result.reason_codes
 
     def test_derive_thesis_insufficient(self, sample_indicators, sample_structure):
         setup = Setup(type="None", direction="NONE", status="NONE")

@@ -525,19 +525,19 @@ def combine_unknown_branch(no_position_dec: Decision, existing_dec: Decision) ->
     if no_position_dec.decision == "BUY" and existing_dec.decision == "HOLD":
         d.decision = "WAIT"
         d.decision_direction = no_position_dec.decision_direction
-        d.reason_codes = ["WAIT-01"]
+        d.reason_codes = list(no_position_dec.reason_codes) + list(existing_dec.reason_codes)
 
     # If NO_POSITION says WAIT and EXISTING says HOLD -> WAIT
     elif no_position_dec.decision == "WAIT" and existing_dec.decision == "HOLD":
         d.decision = "WAIT"
         d.decision_direction = no_position_dec.decision_direction
-        d.reason_codes = ["WAIT-01"]
+        d.reason_codes = list(no_position_dec.reason_codes) + list(existing_dec.reason_codes)
 
     # If NO_POSITION says NO_SETUP and EXISTING says HOLD -> NO_SETUP + detail
     elif no_position_dec.decision == "NO_SETUP" and existing_dec.decision == "HOLD":
         d.decision = "NO_SETUP"
         d.decision_direction = "NONE"
-        d.reason_codes = ["NOSETUP-01"]
+        d.reason_codes = list(no_position_dec.reason_codes) + list(existing_dec.reason_codes)
 
     # If EXISTING says SELL -> SELL
     elif existing_dec.decision == "SELL":
@@ -549,7 +549,7 @@ def combine_unknown_branch(no_position_dec: Decision, existing_dec: Decision) ->
     else:
         d.decision = "WAIT"
         d.decision_direction = no_position_dec.decision_direction
-        d.reason_codes = ["WAIT-01"]
+        d.reason_codes = list(no_position_dec.reason_codes) + list(existing_dec.reason_codes)
 
     d.dual_branch = {
         "no_position": no_position_dec.decision,
