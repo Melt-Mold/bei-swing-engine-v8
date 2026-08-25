@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from bei_swing_engine_v8.engine import analyze_ticker, parse_params, default_params
 from bei_swing_engine_v8.data import load_ohlcv, load_ihsg
 from bei_swing_engine_v8.fetcher import fetch_and_save, VALID_PERIODS
-from bei_swing_engine_v8.chat import explain_decision, explain_general, parse_user_intent
+from bei_swing_engine_v8.chat import explain_decision, explain_decision_with_llm, explain_general, parse_user_intent
 from bei_swing_engine_v8.logging_config import setup_logging
 
 
@@ -71,9 +71,23 @@ def run_analysis_for_csv(csv_path: str, ihsg_path: str = None) -> dict:
 def render_chat_response(response):
     """Render a ChatResponse object in Streamlit."""
     st.markdown(response.summary)
-    st.markdown(response.detail)
-    st.markdown(response.trade_plan)
+    if response.detail:
+        st.markdown(response.detail)
+    if response.trade_plan:
+        st.markdown(response.trade_plan)
     st.info(response.disclaimer)
+
+
+def explain_with_optional_llm(decision, use_llm, api_key, model, base_url):
+    """Explain decision using LLM if enabled and key provided, else template mode."""
+    if use_llm and api_key:
+        return explain_decision_with_llm(
+            decision,
+            api_key=api_key,
+            model=model,
+            base_url=base_url if base_url else None,
+        )
+    return explain_decision(decision)
 
 
 def main():
@@ -93,6 +107,19 @@ def main():
             with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as f:
                 f.write(ihsg_file.getvalue())
                 ihsg_path = f.name
+
+        st.divider()
+        st.subheader("🤖 LLM Backend (opsional)")
+        use_llm = st.toggle("Gunakan LLM explanation", value=False)
+        api_key = ""
+        model = "gpt-4o-mini"
+        base_url = ""
+        if use_llm:
+            api_key = st.text_input("OpenAI API Key", type="password")
+            model = st.text_input("Model", value="gpt-4o-mini")
+            base_url = st.text_input("Base URL (kosongkan untuk OpenAI resmi)", value="")
+            if not api_key:
+                st.warning("Masukkan API key untuk menggunakan LLM. Tanpa API key, mode template akan dipakai.")
 
         st.divider()
         st.markdown("**Perintah contoh:**")
@@ -145,7 +172,7 @@ def main():
                     st.warning("Engine tidak mengembalikan decision.")
                     response_text = "Engine tidak mengembalikan keputusan."
                 else:
-                    response = explain_decision(decision)
+                    response = explain_with_optional_llm(decision, use_llm, api_key, model, base_url)
                     render_chat_response(response)
                     response_text = f"{response.summary}\n\n{response.detail}\n\n{response.trade_plan}\n\n{response.disclaimer}"
             st.session_state.messages.append({"role": "assistant", "content": response_text})
@@ -176,7 +203,7 @@ def main():
                             st.warning("Engine tidak mengembalikan decision.")
                             response_text = "Engine tidak mengembalikan keputusan."
                         else:
-                            response = explain_decision(decision)
+                            response = explain_with_optional_llm(decision, use_llm, api_key, model, base_url)
                             render_chat_response(response)
                             response_text = f"{response.summary}\n\n{response.detail}\n\n{response.trade_plan}\n\n{response.disclaimer}"
 

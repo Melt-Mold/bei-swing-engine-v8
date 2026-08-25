@@ -210,3 +210,109 @@ def parse_user_intent(message: str) -> Dict[str, str]:
         return {"intent": "explain_locked", "ticker": ""}
 
     return {"intent": "general", "ticker": ""}
+
+
+# ---------------------------------------------------------------------------
+# Optional LLM backend (OpenAI-compatible)
+# ---------------------------------------------------------------------------
+
+def build_llm_system_prompt() -> str:
+    """Return a concise system prompt for an LLM explainer."""
+    return (
+        "You are BEI Swing Engine v8.0 Assistant, an expert technical-analysis explainer "
+        "for Indonesian stocks (BEI/Bursa Efek Indonesia).\n\n"
+        "Rules:\n"
+        "1. NEVER calculate indicators or invent numbers. Use only the provided Decision object.\n"
+        "2. Use FINAL.md terminology: decision states (BUY/HOLD/SELL/WAIT/NO_SETUP/INSUFFICIENT_DATA), "
+        "setup states (NONE/DEVELOPING/CONFIRMED/TRIGGERED/FAILED/INVALIDATED), reason codes (BUY-01, WAIT-03, etc.).\n"
+        "3. Explain the thesis, evidence, primary setup, tradeability, reason codes, and trade plan clearly.\n"
+        "4. Mention warnings and vetoes if present.\n"
+        "5. Always end with the disclaimer: analysis is educational, NOT investment advice.\n"
+        "6. Respond in the same language as the user's question (default Indonesian)."
+    )
+
+
+def decision_to_prompt_context(decision: Decision) -> Dict:
+    """Serialize a Decision into a dict suitable for LLM prompt."""
+    setup = decision.primary_setup
+    return {
+        "ticker": "",
+        "decision": decision.decision,
+        "direction": decision.decision_direction,
+        "thesis": decision.thesis_state,
+        "primary_setup": {
+            "type": setup.type if setup else None,
+            "direction": setup.direction if setup else None,
+            "status": setup.status if setup else None,
+        },
+        "evidence_state": decision.evidence_state,
+        "confluence_state": decision.confluence_state,
+        "tradeability_state": decision.tradeability_state,
+        "reason_codes": decision.reason_codes,
+        "reason_code_meanings": [REASON_CODE_MEANING.get(c, "Unknown") for c in decision.reason_codes],
+        "warnings": decision.warnings,
+        "vetoes": decision.vetoes_triggered,
+        "entry": decision.entry,
+        "sl": decision.sl,
+        "tp1": decision.tp1,
+        "tp2": decision.tp2,
+        "rr_raw": decision.rr_raw,
+    }
+
+
+def explain_decision_with_llm(
+    decision: Decision,
+    api_key: str,
+    model: str = "gpt-4o-mini",
+    base_url: Optional[str] = None,
+) -> ChatResponse:
+    """
+    Generate a ChatResponse using an OpenAI-compatible LLM API.
+    Falls back to deterministic template mode if the API call fails.
+    """
+    try:
+        from openai import OpenAI
+    except ImportError:
+        return explain_decision(decision)
+
+    client_kwargs = {"api_key": api_key}
+    if base_url:
+        client_kwargs["base_url"] = base_url
+
+    try:
+        client = OpenAI(**client_kwargs)
+        context = decision_to_prompt_context(decision)
+        user_prompt = (
+            "Jelaskan keputusan analisis teknikal berikut dalam bahasa Indonesia:\n\n"
+            f"{context}\n\n"
+            "Berikan: ringkasan eksekutif, alasan keputusan dengan reason code, "
+            "peringatan/veto jika ada, rencana perdagangan, dan disclaimer edukatif."
+        )
+
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": build_llm_system_prompt()},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=0.2,
+            max_tokens=800,
+        )
+
+        content = response.choices[0].message.content.strip()
+        return ChatResponse(
+            summary=content,
+            detail="",
+            trade_plan="",
+            disclaimer=(
+                "**Disclaimer:** Analisis ini bersifat edukatif untuk pembelajaran analisis teknikal, "
+                "BUKAN rekomendasi investasi atau ajakan untuk membeli/menjual efek. "
+                "Keputusan investasi dan risiko sepenuhnya menjadi tanggung jawab pengguna."
+            ),
+            raw_decision=decision,
+        )
+    except Exception as e:
+        # Fall back to deterministic template on any LLM error
+        fallback = explain_decision(decision)
+        fallback.detail = f"_(LLM fallback karena {e})_\n\n{fallback.detail}"
+        return fallback

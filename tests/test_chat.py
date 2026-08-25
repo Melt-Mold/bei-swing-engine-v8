@@ -1,8 +1,11 @@
 """Tests for chat AI explainer module."""
 import pytest
 
+from unittest.mock import MagicMock, patch
+
 from bei_swing_engine_v8.chat import (
     explain_decision,
+    explain_decision_with_llm,
     explain_general,
     explain_reason_codes,
     parse_user_intent,
@@ -102,3 +105,50 @@ class TestChatExplainer:
             "SELL-01", "SELL-02", "SELL-03", "SELL-04",
         }
         assert required.issubset(set(REASON_CODE_MEANING.keys()))
+
+
+class TestChatLLM:
+    def _make_decision(self):
+        return Decision(
+            decision="BUY",
+            decision_direction="LONG",
+            thesis_state="BULLISH",
+            primary_setup=Setup(type="Breakout", direction="LONG", status="TRIGGERED"),
+            evidence_state="Strong",
+            confluence_state="Strong",
+            tradeability_state="TRADEABLE",
+            reason_codes=["BUY-01"],
+            entry=1000.0,
+            sl=950.0,
+            tp1=1100.0,
+            tp2=1200.0,
+            rr_raw=2.0,
+        )
+
+    @patch("openai.OpenAI")
+    def test_explain_decision_with_llm_success(self, mock_openai_class):
+        mock_client = MagicMock()
+        mock_choice = MagicMock()
+        mock_choice.message.content = "LLM-generated explanation in Indonesian."
+        mock_client.chat.completions.create.return_value.choices = [mock_choice]
+        mock_openai_class.return_value = mock_client
+
+        dec = self._make_decision()
+        response = explain_decision_with_llm(dec, api_key="fake-key", model="gpt-4o-mini")
+
+        assert "LLM-generated explanation" in response.summary
+        assert "Disclaimer" in response.disclaimer
+        assert response.raw_decision is dec
+        mock_client.chat.completions.create.assert_called_once()
+
+    @patch("openai.OpenAI")
+    def test_explain_decision_with_llm_fallback_on_error(self, mock_openai_class):
+        mock_openai_class.side_effect = Exception("API error")
+
+        dec = self._make_decision()
+        response = explain_decision_with_llm(dec, api_key="fake-key")
+
+        # Should fall back to deterministic template
+        assert "BUY" in response.summary
+        assert "API error" in response.detail
+        assert "Disclaimer" in response.disclaimer

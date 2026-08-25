@@ -27,7 +27,7 @@ python -m venv venv
 # Run Web UI
 .\venv\Scripts\python.exe -m streamlit run webui.py
 
-# Run Chat AI
+# Run Chat AI (template mode default; toggle LLM di sidebar jika punya API key)
 .\venv\Scripts\python.exe -m streamlit run chat_app.py
 
 # Run tests
@@ -79,7 +79,7 @@ C:\Opencode4\
 │   ├── setup.py                      # Deteksi setup (6 tipe)
 │   └── structure.py                  # Swing, S/R, Fibonacci, BOS/CHoCH
 │
-├── tests/                            # Unit tests (255 test, 29 file)
+├── tests/                            # Unit tests (257 test, 29 file)
 │   ├── __init__.py
 │   ├── conftest.py                   # Shared fixtures
 │   ├── test_api.py
@@ -206,7 +206,7 @@ Key dependencies: `pandas`, `numpy`, `openpyxl`, `jinja2`, `xhtml2pdf`, `pypdf`,
 .\venv\Scripts\python.exe scripts/verify_final_compliance.py --data data-csv-yfinance-cleaned/TLKM.JK_cleaned.csv --ihsg data-csv-yfinance-cleaned/IHSG-JKSE_cleaned.csv
 ```
 
-**Current status:** 255 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
+**Current status:** 257 tests, all passing. Coverage: 81% (run `pytest --cov` for report). Linting: 0 errors with flake8.
 
 ### CI/CD
 
@@ -266,6 +266,12 @@ Parameter berikut di-lock di `BEI_Swing_Engine_v8.0_FINAL.md` section 5. **Janga
 | A | Full report (Executive Summary → Decision Trace → Disclaimer) |
 | B | Calc-only (Market Context, Structure, Indicators, Setup Status — tanpa decision/trade plan) |
 | C | Screening summary table only |
+
+### Chat AI
+- `chat_app.py` menyediakan interface chat Streamlit.
+- Default explanation menggunakan template deterministic di `chat.py` — tidak ada hallucination risk.
+- Toggle di sidebar memungkinkan penggunaan LLM backend (OpenAI-compatible API). Jika LLM gagal, otomatis fallback ke template mode.
+- Chat AI **tidak pernah menghitung indikator sendiri**; selalu memanggil engine Python untuk analisis angka.
 
 ### Logging
 - Gunakan `get_logger("module_name")` dari `logging_config.py`.
